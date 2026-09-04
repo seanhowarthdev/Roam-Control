@@ -42,7 +42,7 @@ shasum -a 256 RoamControl-0.9.0-build29.ipa
 For Build 29, the expected checksum is:
 
 ```text
-87cee242c2bd96c935ea6a8dd52bd562696f3fe4e24e566509a3e26638b9593e
+3ad8d5cb1151dabd8b4c29a065d46501095f07c74c8e92e45d845822dcfe1e7b
 ```
 
 See the [user guide](UserGuide.md) for pairing and everyday operation.
