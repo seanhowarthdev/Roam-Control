@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Public beta candidate:</strong> 0.9.0 (Build 29) · <strong>Requires:</strong> iOS 27+
+  <strong>Public beta:</strong> 0.9.0 (Build 29) · <strong>Requires:</strong> iOS 27+
 </p>
 
 Roam Control is an open-source SwiftUI app for location-based development, quality assurance and responsible personal testing on an iPhone you own and control. It supports fixed locations, walking routes, favourites, history, native on-device pairing and LocalDevVPN-compatible sessions.
@@ -114,7 +114,7 @@ The native engine is a narrow Rust-to-Swift bridge around the MIT-licensed [`ide
 - [Responsible use](Documentation/ResponsibleUse.md)
 - [Build and release guide](Documentation/BuildAndRelease.md)
 - [Regression checklist](Documentation/RegressionChecklist.md)
-- [Public-beta release draft](Documentation/PublicBetaRelease.md)
+- [Beta 1 release notes](Documentation/PublicBetaRelease.md)
 - [Security policy](SECURITY.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
 

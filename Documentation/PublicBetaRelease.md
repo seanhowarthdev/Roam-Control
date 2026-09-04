@@ -13,7 +13,7 @@ Read the [installation guide](Installation.md), [privacy explanation](Privacy.md
 
 ## Download
 
-Attach `RoamControl-0.9.0-build29.ipa` to this release.
+Download `RoamControl-0.9.0-build29.ipa` from the GitHub Release assets.
 
 SHA-256:
 

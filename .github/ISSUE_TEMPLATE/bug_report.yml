@@ -22,6 +22,16 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation method
+      options:
+        - SideStore
+        - Xcode
+        - Other
+    validations:
+      required: true
+  - type: dropdown
     id: connection
     attributes:
       label: Connection

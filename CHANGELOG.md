@@ -6,7 +6,7 @@ All notable public changes to Roam Control are recorded here.
 
 ## [0.9.0-beta.1] - 2026-09-04
 
-First public-beta candidate, corresponding to app version 0.9.0 Build 29.
+First public beta, corresponding to app version 0.9.0 Build 29.
 
 ### Added
 
@@ -26,5 +26,5 @@ First public-beta candidate, corresponding to app version 0.9.0 Build 29.
 - Prevented failed location updates from being counted as successful.
 - Moved the release analytics destination and Apple development-team identifier out of tracked project settings.
 
-[Unreleased]: https://github.com/OWNER/RoamControl/compare/v0.9.0-beta.1...HEAD
-[0.9.0-beta.1]: https://github.com/OWNER/RoamControl/releases/tag/v0.9.0-beta.1
+[Unreleased]: https://github.com/seanhowarthdev/Roam-Control/compare/v0.9.0-beta.1...HEAD
+[0.9.0-beta.1]: https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.0-beta.1

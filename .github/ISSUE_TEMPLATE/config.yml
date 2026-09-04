@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/OWNER/RoamControl/security/advisories/new
-    about: Report a vulnerability privately. Replace OWNER after creating the repository.
+    url: https://github.com/seanhowarthdev/Roam-Control/security/advisories/new
+    about: Report a vulnerability privately.
