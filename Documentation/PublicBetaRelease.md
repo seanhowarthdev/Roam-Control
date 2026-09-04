@@ -18,7 +18,7 @@ Attach `RoamControl-0.9.0-build29.ipa` to this release.
 SHA-256:
 
 ```text
-af48336dd735286783b6d7269776ca95f5f34b97b81f9ed6a1f8679768220f37
+87cee242c2bd96c935ea6a8dd52bd562696f3fe4e24e566509a3e26638b9593e
 ```
 
 ## Highlights
