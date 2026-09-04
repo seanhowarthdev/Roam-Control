@@ -14,6 +14,27 @@
 
 Roam Control is an open-source SwiftUI app for location-based development, quality assurance and responsible personal testing on an iPhone you own and control. It supports fixed locations, walking routes, favourites, history, native on-device pairing and LocalDevVPN-compatible sessions.
 
+## Screenshots
+
+<p align="center">
+  <img src="Documentation/Images/README/welcome.png" width="240" alt="Roam Control welcome screen">
+  <img src="Documentation/Images/README/fixed-location.png" width="240" alt="Selecting a fixed location in London">
+  <img src="Documentation/Images/README/walking-active.png" width="240" alt="Active simulated walking route">
+</p>
+
+<p align="center">
+  <sub>Welcome · Fixed location · Walking route</sub>
+</p>
+
+<p align="center">
+  <img src="Documentation/Images/README/privacy.png" width="240" alt="Privacy-first anonymous statistics choice">
+  <img src="Documentation/Images/README/settings.png" width="240" alt="Roam Control settings">
+</p>
+
+<p align="center">
+  <sub>Private by design · Settings</sub>
+</p>
+
 ## Highlights
 
 - Search places live with MapKit, enter coordinates or tap the map.
