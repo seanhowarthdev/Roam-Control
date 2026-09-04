@@ -9,12 +9,6 @@
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).$(DEVELOPMENT_TEAM).pairing.*</string>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).$(DEVELOPMENT_TEAM).location.*</string>
 	</array>
-	<key>RoamControlBuildTimestamp</key>
-	<string>$(ROAMCONTROL_BUILD_TIMESTAMP)</string>
-	<key>RoamControlTelemetryAppID</key>
-	<string>$(ROAMCONTROL_TELEMETRY_APP_ID)</string>
-	<key>RoamControlTelemetryNamespace</key>
-	<string>$(ROAMCONTROL_TELEMETRY_NAMESPACE)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -37,7 +31,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.sean.roamcontrol.callback</string>
+			<string>com.roamcontrol.callback</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>roamcontrol</string>
@@ -61,6 +55,12 @@
 	<string>Roam Control uses the local network to securely pair with and control this iPhone through LocalDevVPN.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Roam Control uses your location to show and recenter on your real position after a location session stops.</string>
+	<key>RoamControlBuildTimestamp</key>
+	<string>$(ROAMCONTROL_BUILD_TIMESTAMP)</string>
+	<key>RoamControlTelemetryAppID</key>
+	<string>$(ROAMCONTROL_TELEMETRY_APP_ID)</string>
+	<key>RoamControlTelemetryNamespace</key>
+	<string>$(ROAMCONTROL_TELEMETRY_NAMESPACE)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
