@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific data
+xcuserdata/
+*.xcuserstate
+
+# Xcode build output
+DerivedData/
+build/
+
+# Swift Package Manager
+.build/
+.swiftpm/xcode/package.xcworkspace/xcuserdata/
+
+# Archives / signing
+*.xcarchive
+*.ipa
+*.mobileprovision
+*.p12
+*.cer
+*.pem
+*.key
+
+# Environment / secrets
+.env
+.env.*
+*.secret
+Secrets.plist
+
+# Temporary files
+*.swp
+*.tmp
+
+# Local private configuration
+Configuration/Local.private.xcconfig

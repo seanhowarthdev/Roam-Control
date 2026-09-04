@@ -1,0 +1,5 @@
+module RoamPairingFFI {
+    header "roam_pairing.h"
+    export *
+}
+

@@ -1,0 +1,5 @@
+// Copy this file to Local.private.xcconfig and fill in only the values needed
+// for your own build. Local.private.xcconfig is ignored by Git.
+DEVELOPMENT_TEAM = YOUR-APPLE-DEVELOPMENT-TEAM-ID
+ROAMCONTROL_TELEMETRY_APP_ID = YOUR-TELEMETRYDECK-APP-ID
+ROAMCONTROL_TELEMETRY_NAMESPACE = your.namespace

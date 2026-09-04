@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).pairing.*</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).location.*</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).$(DEVELOPMENT_TEAM).pairing.*</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).$(DEVELOPMENT_TEAM).location.*</string>
+	</array>
+	<key>RoamControlBuildTimestamp</key>
+	<string>$(ROAMCONTROL_BUILD_TIMESTAMP)</string>
+	<key>RoamControlTelemetryAppID</key>
+	<string>$(ROAMCONTROL_TELEMETRY_APP_ID)</string>
+	<key>RoamControlTelemetryNamespace</key>
+	<string>$(ROAMCONTROL_TELEMETRY_NAMESPACE)</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Roam Control</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.sean.roamcontrol.callback</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>roamcontrol</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>localdevvpn</string>
+	</array>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_remotepairing-pairable-host._tcp</string>
+		<string>_remotepairing._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Roam Control uses the local network to securely pair with and control this iPhone through LocalDevVPN.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Roam Control uses your location to show and recenter on your real position after a location session stops.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict/>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+</dict>
+</plist>

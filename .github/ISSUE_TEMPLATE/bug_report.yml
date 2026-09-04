@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a reproducible Roam Control problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach pairing records, PINs, certificates, provisioning profiles, credentials or unredacted private locations. Report security issues through a private security advisory.
+  - type: input
+    id: app-version
+    attributes:
+      label: Roam Control version and build
+      placeholder: 0.9.0 (Build 29)
+    validations:
+      required: true
+  - type: input
+    id: ios-version
+    attributes:
+      label: iOS version and iPhone model
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options:
+        - Wi-Fi
+        - Mobile data
+        - Not connection-related
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use a non-sensitive example location where possible.
+      placeholder: |
+        1. Open…
+        2. Tap…
+        3. See…
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed pairing data, credentials and private location details from this report.
+          required: true

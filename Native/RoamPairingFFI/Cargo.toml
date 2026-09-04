@@ -1,0 +1,21 @@
+[package]
+name = "roam_pairing_ffi"
+version = "0.1.0"
+edition = "2024"
+description = "Roam Control's native bridge for iOS device-initiated remote pairing"
+license = "MIT"
+publish = false
+
+[lib]
+name = "roam_pairing_ffi"
+crate-type = ["staticlib"]
+
+[dependencies]
+idevice = { git = "https://github.com/jkcoxson/idevice.git", rev = "2bc58aaea40c9ced0167c8e7b512ee13c34c760f", default-features = false, features = ["dvt", "location_simulation", "remote_pairing", "rsd", "rustcrypto", "tcp", "tunnel_tcp_stack"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "time", "macros"] }
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = 3
+strip = "symbols"

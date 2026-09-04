@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an improvement consistent with responsible testing
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Explain the development, QA or personal-testing need.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy and safety considerations
+      description: Explain what data or device access would be involved.
+    validations:
+      required: true
