@@ -118,6 +118,12 @@ The native engine is a narrow Rust-to-Swift bridge around the MIT-licensed [`ide
 - [Security policy](SECURITY.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
 
+## Community
+
+For casual help, beta discussion and feature ideas, join the [Roam Control Discord](https://discord.gg/fJrNvQ2Vdh).
+
+For bugs and reproducible issues, please use GitHub Issues. For security-sensitive reports, use GitHub Security Advisories.
+
 ## Contributing
 
 Bug reports and focused improvements are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request, and never upload pairing records, signing material, credentials or private location information.
