@@ -10,7 +10,9 @@ This permits use, modification and redistribution for non-commercial purposes su
 
 Commercial use is not granted by the PolyForm Noncommercial licence. Anyone interested in commercial use should contact the project owner for separate permission.
 
-The required notice for current releases is recorded in `NOTICE`.
+Required notice for current Roam Control source: `Required Notice: Copyright 2026 Sean Howarth`
+
+The same notice is recorded in `NOTICE`.
 
 ## Roam Control 0.9.0 Beta 1
 
