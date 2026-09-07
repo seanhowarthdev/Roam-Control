@@ -14,4 +14,4 @@ Roam Control includes a native bridge linked against open-source Rust software.
 
 The exact dependency graph used by the native bridge is pinned in `Native/RoamPairingFFI/Cargo.lock`. Those packages remain the property of their respective authors and are distributed under the licence stated by each package. Common licences in this dependency graph include MIT, Apache-2.0, BSD and Unicode licences.
 
-The MIT licence for Roam Control applies only to Roam Control's own source. It does not replace or alter any third-party licence. Anyone redistributing a rebuilt native framework or IPA is responsible for retaining the applicable third-party copyright and licence notices for the dependency versions they distribute.
+Roam Control's own source is licensed separately under the repository's `LICENSE` file. Roam Control 0.9.0 Beta 1 remains available under the MIT Licence preserved in `LICENSE-BETA1-MIT`. Neither project licence replaces or alters any third-party licence. Anyone redistributing a rebuilt native framework or IPA is responsible for retaining the applicable third-party copyright and licence notices for the dependency versions they distribute.

@@ -17,10 +17,10 @@
   <img src="https://img.shields.io/badge/UI-SwiftUI-orange" alt="SwiftUI">
   <img src="https://img.shields.io/badge/Beta-0.9.0-purple" alt="Beta 0.9.0">
   <img src="https://img.shields.io/badge/Build-29-lightgrey" alt="Build 29">
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
+  <img src="https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue" alt="PolyForm Noncommercial 1.0.0">
 </p>
 
-Roam Control is an open-source SwiftUI app for location-based development, quality assurance and responsible personal testing on an iPhone you own and control. It supports fixed locations, walking routes, favourites, history, native on-device pairing and LocalDevVPN-compatible sessions.
+Roam Control is a source-available SwiftUI app for location-based development, quality assurance and responsible personal testing on an iPhone you own and control. It supports fixed locations, walking routes, favourites, history, native on-device pairing and LocalDevVPN-compatible sessions.
 
 ## Screenshots
 
@@ -138,4 +138,8 @@ Bug reports and focused improvements are welcome. Read [CONTRIBUTING.md](CONTRIB
 
 ## Licence
 
-Roam Control's own source is available under the [MIT Licence](LICENSE). Bundled dependencies retain their own licences; see [Third-party notices](THIRD_PARTY_NOTICES.md).
+Roam Control's current source is available under the [PolyForm Noncommercial License 1.0.0](LICENSE). It may be used, modified and redistributed for non-commercial purposes under those terms. Commercial use requires separate permission from the project owner.
+
+Roam Control 0.9.0 Beta 1 was released under the MIT Licence and remains available under those terms. The licence change applies to development after Beta 1 and does not revoke rights already granted for that release.
+
+See [Licensing](LICENSING.md) for details. Bundled dependencies retain their own licences; see [Third-party notices](THIRD_PARTY_NOTICES.md).

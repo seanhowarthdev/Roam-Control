@@ -1,6 +1,6 @@
 # Roam Control 0.9.0 Public Beta — Build 29
 
-Roam Control is an open-source SwiftUI app for testing an iPhone's reported location from a clean Apple Maps interface. It supports fixed locations, simulated walking routes, favourites, history and native on-device pairing through LocalDevVPN.
+Roam Control 0.9.0 Beta 1 is an open-source SwiftUI app for testing an iPhone's reported location from a clean Apple Maps interface. It supports fixed locations, simulated walking routes, favourites, history and native on-device pairing through LocalDevVPN.
 
 ## Before installing
 
@@ -37,3 +37,7 @@ SHA-256:
 SideStore and free Apple accounts are subject to Apple's app-count and seven-day refresh limits. Pairing and location sessions require a physical iPhone; the simulator supports interface testing only.
 
 This beta is provided without warranty. Please report ordinary bugs with the issue template and security problems through a private GitHub security advisory.
+
+## Licensing note
+
+Roam Control 0.9.0 Beta 1 was released under the MIT Licence and remains available under those terms. Development after Beta 1 uses the licence stated in the repository's current `LICENSE` file.
