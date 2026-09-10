@@ -1,5 +1,16 @@
 # Roam Control releases
 
+## 0.9.1 (Build 47)
+
+- Created: 10 September 2026 at 18:06 BST
+- Package: `RoamControl-0.9.1-build47.ipa`
+- Configuration: optimized unsigned Release, stripped arm64 iPhone executable
+- Minimum system: iOS 27.0
+- Xcode: 27.0 beta (`27A5252f`)
+- Distribution: unsigned IPA for SideStore re-signing
+- SHA-256: `9d72c2e14a5b5b5c83f516ac4b7f1fdde14bbb5d806c0083f8ca7c2f3d44d9b1`
+- Change: incorporates the first wave of public-beta feedback: clearer stop-and-restore progress, improved interrupted-session recovery and compact background task presentation; richer place search; reorderable favourites; Copy Diagnostics; GitHub feedback forms; manual update checks; and privacy-preserving telemetry for handled failures.
+
 ## 0.9.0 (Build 29)
 
 - Created: 4 September 2026 at 15:36 BST
