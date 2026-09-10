@@ -47,6 +47,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
     private static let localDevVPNPeerAddress = "10.7.0.1"
     private static let enableURL = URL(string: "localdevvpn://enable?scheme=roamcontrol")!
+    private static let minimumRestorationDisplayDuration: TimeInterval = 1.2
 
     private(set) var phase: DeviceSessionPhase = .idle {
         didSet { onPhaseChange?(phase) }
@@ -95,6 +96,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
     private var workerIsRunning = false
     private var cancellationRequested = false
     private var pendingFailureMessage: String?
+    private var restorationDisplayStartDate: Date?
 
     override init() {
         super.init()
@@ -127,6 +129,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
 #else
         cancellationRequested = false
         pendingFailureMessage = nil
+        restorationDisplayStartDate = nil
         mobileDataGuidance = nil
         hasRequestedLocalDevVPNThisAttempt = false
         isMobileDataStartupMode = false
@@ -265,7 +268,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
             cleanupDiscovery()
             clearPendingSession()
             phase = .idle
-        case .connecting, .active:
+        case .connecting:
             cancellationRequested = true
             phase = .stopping
             if let activeSession {
@@ -274,6 +277,17 @@ final class LocalDeviceSessionCoordinator: NSObject {
                 BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: submittedTaskIdentifier)
                 clearPendingSession()
                 phase = .idle
+            }
+        case .active:
+            cancellationRequested = true
+            restorationDisplayStartDate = .now
+            phase = .stopping
+            backgroundTask?.updateTitle(
+                "Roam Control",
+                subtitle: "Restoring real location…"
+            )
+            if let activeSession {
+                rc_location_session_cancel(activeSession)
             }
         case .stopping:
             break
@@ -611,8 +625,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
         if cancellationRequested {
             cancellationRequested = false
             clearPendingSession()
-            phase = .idle
-            finishBackgroundTask(success: true)
+            finishCancelledLocationSession()
             return
         }
 
@@ -836,6 +849,25 @@ final class LocalDeviceSessionCoordinator: NSObject {
         backgroundTask?.setTaskCompleted(success: success)
         backgroundTask = nil
         submittedTaskIdentifier = nil
+    }
+
+    private func finishCancelledLocationSession() {
+        let elapsed = restorationDisplayStartDate.map { Date.now.timeIntervalSince($0) } ?? .infinity
+        restorationDisplayStartDate = nil
+        let remaining = max(0, Self.minimumRestorationDisplayDuration - elapsed)
+
+        guard remaining > 0 else {
+            phase = .idle
+            finishBackgroundTask(success: true)
+            return
+        }
+
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(remaining))
+            guard let self, !self.workerIsRunning, self.phase == .stopping else { return }
+            self.phase = .idle
+            self.finishBackgroundTask(success: true)
+        }
     }
 
     private func isRecoverableTunnelConnectionFailure(_ message: String) -> Bool {

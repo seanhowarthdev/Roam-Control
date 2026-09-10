@@ -6,9 +6,14 @@ enum UsageAnalyticsEvent: String {
     case appActivated = "RoamControl.App.activated"
     case onboardingCompleted = "RoamControl.Onboarding.completed"
     case pairingCompleted = "RoamControl.Pairing.completed"
+    case pairingFailed = "RoamControl.Pairing.Failed"
     case fixedLocationStarted = "RoamControl.Location.fixedStarted"
     case walkingStarted = "RoamControl.Location.walkingStarted"
     case activeLocationUpdated = "RoamControl.Location.activeUpdated"
+    case locationPreparationFailed = "RoamControl.Location.PreparationFailed"
+    case locationRestoreFailed = "RoamControl.Location.RestoreFailed"
+    case localDevVPNUnreachable = "RoamControl.LocalDevVPN.Unreachable"
+    case locationStartFailed = "RoamControl.Location.StartFailed"
 }
 
 /// Sends a deliberately small, fixed set of anonymous usage signals.

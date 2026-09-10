@@ -12,6 +12,8 @@ struct HomeView: View {
     @State private var isShowingSettings: Bool
     @State private var isShowingSavedPlaces = false
     @State private var shouldRefreshRealLocationWhenActive = false
+    @State private var shouldClearLocationAfterRestoration = false
+    @State private var isLocatingRealLocationAfterRestoration = false
     @State private var visibleMapCamera: MapCamera?
     @State private var isPreparingRecoveredWalk = false
     @State private var recoveredWalkError: String?
@@ -99,7 +101,8 @@ struct HomeView: View {
                     )
                 }
 
-                HStack {
+                if !isSearchingForLocation {
+                    HStack {
                     Button {
                         isShowingDeviceSetup = true
                     } label: {
@@ -139,9 +142,9 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel("Settings")
                     }
-                }
+                    }
 
-                if needsPairingPrompt {
+                    if needsPairingPrompt {
                     Button {
                         isShowingDeviceSetup = true
                     } label: {
@@ -170,11 +173,11 @@ struct HomeView: View {
                         .shadow(color: .black.opacity(0.08), radius: 8, y: 3)
                     }
                     .buttonStyle(.plain)
-                }
+                    }
 
-                Spacer()
+                    Spacer()
 
-                HStack {
+                    HStack {
                     Spacer()
 
                     VStack(spacing: 10) {
@@ -214,9 +217,11 @@ struct HomeView: View {
                             .accessibilityLabel("Show my current location")
                         }
                     }
-                }
+                    }
 
-                if let route = walkingRoutePlanner.route,
+                    if isLocatingRealLocationAfterRestoration {
+                    RestoringRealLocationCard()
+                    } else if let route = walkingRoutePlanner.route,
                    let destination = walkingRoutePlanner.destination {
                     WalkingRoutePreviewCard(
                         route: route,
@@ -238,6 +243,7 @@ struct HomeView: View {
                             mapModel.clearSelectedLocation()
                         },
                         onStop: {
+                            shouldClearLocationAfterRestoration = true
                             walkingSimulation.stop(using: appModel.deviceSession)
                         },
                         onDone: {
@@ -246,10 +252,9 @@ struct HomeView: View {
                             mapModel.show(destination)
                         }
                     )
-                } else {
+                    } else {
                     LocationSelectionCard(
                         location: mapModel.selectedLocation,
-                        lastLocation: isLocationSessionActive ? nil : appModel.resumeLocation,
                         isFavourite: mapModel.selectedLocation.map(appModel.isFavourite) ?? false,
                         isPaired: isPaired,
                         sessionPhase: appModel.deviceSession.phase,
@@ -265,15 +270,6 @@ struct HomeView: View {
                             walkingRoutePlanner.clear()
                             mapModel.clearSelectedLocation()
                         },
-                        onDismissLast: {
-                            appModel.dismissResumeLocation()
-                            mapModel.prepareCurrentLocation(recenter: true)
-                        },
-                        onResumeLast: {
-                            guard let target = appModel.resumeLocation else { return }
-                            mapModel.show(target)
-                            Task { await appModel.startLocationSession(at: target) }
-                        },
                         onPreviewWalkingRoute: {
                             guard let target = mapModel.selectedLocation else { return }
                             Task {
@@ -285,12 +281,18 @@ struct HomeView: View {
                         },
                         onStart: {
                             guard let target = mapModel.selectedLocation else { return }
+                            shouldRefreshRealLocationWhenActive = false
+                            mapModel.show(target)
                             Task { await appModel.startLocationSession(at: target) }
                         },
                         onStop: {
+                            shouldClearLocationAfterRestoration = true
                             appModel.stopLocationSession()
                         }
                     )
+                    }
+                } else {
+                    Spacer()
                 }
             }
             .padding(.horizontal, 16)
@@ -384,11 +386,9 @@ struct HomeView: View {
             await appModel.restorePairingStatus()
             if let interruptedLocation = appModel.interruptedSession?.lastReportedLocation {
                 mapModel.center(on: interruptedLocation)
-            } else if let lastLocation = appModel.resumeLocation {
-                mapModel.center(on: lastLocation)
             }
             mapModel.prepareCurrentLocation(
-                recenter: appModel.resumeLocation == nil && appModel.interruptedSession == nil
+                recenter: appModel.interruptedSession == nil
             )
             if isShowingDeviceSetup {
                 appModel.deviceSetupWasPresented()
@@ -402,17 +402,30 @@ struct HomeView: View {
 
             switch newPhase {
             case .openingLocalDevVPN, .discovering, .connecting, .active, .stopping:
+                shouldRefreshRealLocationWhenActive = false
                 mapModel.invalidateRealLocationCache()
-            case .idle, .failed:
-                break
+            case .idle:
+                if oldPhase == .stopping, shouldClearLocationAfterRestoration {
+                    shouldClearLocationAfterRestoration = false
+                    walkingSimulation.reset()
+                    walkingRoutePlanner.clear()
+                    mapModel.clearSelectedLocation()
+                    shouldRefreshRealLocationWhenActive = false
+                    isLocatingRealLocationAfterRestoration = true
+                    mapModel.refreshRealLocationAfterRestoration()
+                }
+            case .failed:
+                shouldClearLocationAfterRestoration = false
             }
 
             guard oldPhase == .stopping, newPhase == .idle else { return }
+            guard !isLocatingRealLocationAfterRestoration else { return }
             shouldRefreshRealLocationWhenActive = true
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(3))
                 guard shouldRefreshRealLocationWhenActive, scenePhase == .active else { return }
                 shouldRefreshRealLocationWhenActive = false
+                guard case .idle = appModel.deviceSession.phase else { return }
                 mapModel.showRealLocationAfterSession()
             }
         }
@@ -424,12 +437,17 @@ struct HomeView: View {
                 walkingRoutePlanner.clear()
             }
         }
+        .onChange(of: mapModel.isFindingRealLocation) { _, isFindingRealLocation in
+            guard isLocatingRealLocationAfterRestoration, !isFindingRealLocation else { return }
+            isLocatingRealLocationAfterRestoration = false
+        }
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
             appModel.deviceSession.appDidBecomeActive()
 
             guard shouldRefreshRealLocationWhenActive else { return }
             shouldRefreshRealLocationWhenActive = false
+            guard case .idle = appModel.deviceSession.phase else { return }
             mapModel.showRealLocationAfterSession()
         }
         .sheet(isPresented: $isShowingDeviceSetup) {
@@ -444,6 +462,7 @@ struct HomeView: View {
             SavedPlacesView(
                 favourites: appModel.favouriteLocations,
                 history: appModel.locationHistory,
+                shouldShowFavouriteReorderHint: !appModel.hasSeenFavouriteReorderHint,
                 isFavourite: appModel.isFavourite,
                 onSelect: { target in
                     guard !walkingSimulation.locksDestination else { return }
@@ -451,6 +470,8 @@ struct HomeView: View {
                 },
                 onToggleFavourite: appModel.toggleFavourite,
                 onDeleteFavourite: appModel.removeFavourite,
+                onMoveFavourites: appModel.moveFavouriteLocations,
+                onDismissFavouriteReorderHint: appModel.dismissFavouriteReorderHint,
                 onRenameFavourite: appModel.renameFavourite,
                 onDeleteHistory: appModel.removeFromHistory,
                 onClearFavourites: appModel.clearFavouriteLocations,
@@ -466,6 +487,10 @@ struct HomeView: View {
         case .checking, .importing, .paired:
             false
         }
+    }
+
+    private var isSearchingForLocation: Bool {
+        isSearchFocused || mapModel.isShowingSuggestions
     }
 
     private var isPaired: Bool {

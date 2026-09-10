@@ -31,7 +31,11 @@ final class OnDevicePairingCoordinator {
         BackgroundTaskIdentifier.prefix(for: "pairing")
     }
 
-    private(set) var phase: OnDevicePairingPhase = .idle
+    private(set) var phase: OnDevicePairingPhase = .idle {
+        didSet { onPhaseChange?(phase) }
+    }
+
+    var onPhaseChange: ((OnDevicePairingPhase) -> Void)?
 
     private let publisher = PairingBonjourPublisher()
     private var activeSession: OpaquePointer?

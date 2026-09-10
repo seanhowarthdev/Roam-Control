@@ -5,7 +5,6 @@ struct LocationSelectionCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let location: LocationTarget?
-    let lastLocation: LocationTarget?
     let isFavourite: Bool
     let isPaired: Bool
     let sessionPhase: DeviceSessionPhase
@@ -14,13 +13,12 @@ struct LocationSelectionCard: View {
     let walkingRouteError: String?
     let onToggleFavourite: () -> Void
     let onClearSelection: () -> Void
-    let onDismissLast: () -> Void
-    let onResumeLast: () -> Void
     let onPreviewWalkingRoute: () -> Void
     let onStart: () -> Void
     let onStop: () -> Void
 
     @State private var didCopyCoordinates = false
+    @State private var isConfirmingStop = false
 
     var body: some View {
         Group {
@@ -36,6 +34,16 @@ struct LocationSelectionCard: View {
         .padding(18)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 18, y: 8)
+        .confirmationDialog(
+            "Stop the simulated location and restore your real location?",
+            isPresented: $isConfirmingStop,
+            titleVisibility: .visible
+        ) {
+            Button("Stop & Restore", role: .destructive, action: onStop)
+            Button("Keep Simulated Location", role: .cancel) {}
+        } message: {
+            Text("Roam Control will end the simulated location and restore this iPhone's real location.")
+        }
     }
 
     @ViewBuilder
@@ -88,7 +96,9 @@ struct LocationSelectionCard: View {
                 }
 
                 if isActive && !isShowingActiveTarget {
-                    Button("Stop Location", role: .destructive, action: onStop)
+                    Button("Stop & Restore", role: .destructive) {
+                        isConfirmingStop = true
+                    }
                         .buttonStyle(.bordered)
                         .controlSize(.regular)
                         .frame(maxWidth: .infinity)
@@ -122,10 +132,6 @@ struct LocationSelectionCard: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-
-                if let lastLocation {
-                    resumeLastControls(lastLocation)
-                }
             }
         }
     }
@@ -206,44 +212,6 @@ struct LocationSelectionCard: View {
         }
     }
 
-    @ViewBuilder
-    private func resumeLastControls(_ lastLocation: LocationTarget) -> some View {
-        let resumeButton = Button(action: onResumeLast) {
-            Label("Resume \(lastLocation.name)", systemImage: "arrow.clockwise")
-                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
-                .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .disabled(!isPaired || isWorking)
-
-        let dismissButton = Button(action: onDismissLast) {
-            if dynamicTypeSize.isAccessibilitySize {
-                Label("Dismiss", systemImage: "xmark")
-                    .frame(minWidth: 44, minHeight: 44)
-            } else {
-                Image(systemName: "xmark")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 44, height: 44)
-            }
-        }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .accessibilityLabel("Dismiss last location suggestion")
-
-        if dynamicTypeSize.isAccessibilitySize {
-            VStack(spacing: 8) {
-                resumeButton
-                dismissButton.frame(maxWidth: .infinity)
-            }
-        } else {
-            HStack(spacing: 8) {
-                resumeButton
-                dismissButton
-            }
-        }
-    }
-
     private func locationDescription(for location: LocationTarget) -> String {
         let name = location.name.trimmingCharacters(in: .whitespacesAndNewlines)
         let subtitle = location.subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -320,9 +288,9 @@ struct LocationSelectionCard: View {
         case .connecting:
             "Starting Location…"
         case .active:
-            isShowingActiveTarget ? "Stop Location" : "Update Location"
+            isShowingActiveTarget ? "Stop & Restore" : "Update Location"
         case .stopping:
-            "Stopping Location…"
+            "Restoring Real Location…"
         case .failed:
             "Try Again"
         case .idle:
@@ -377,9 +345,9 @@ struct LocationSelectionCard: View {
             if !isShowingActiveTarget, let location {
                 return "Currently using \(target.name). Update to move to \(location.name)."
             }
-            return "This iPhone is using \(target.name). Stop to restore its real location."
+            return "This iPhone is using \(target.name). Stop & Restore ends the simulation and restores its real location."
         case .stopping:
-            return "Restoring this iPhone's real location."
+            return "Restoring this iPhone's real location. Keep Roam Control open until this finishes."
         case .failed(let message):
             return message
         }
@@ -387,7 +355,7 @@ struct LocationSelectionCard: View {
 
     private func primaryAction() {
         if isShowingActiveTarget {
-            onStop()
+            isConfirmingStop = true
         } else {
             onStart()
         }

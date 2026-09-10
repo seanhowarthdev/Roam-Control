@@ -1,10 +1,12 @@
 import SwiftUI
+import UIKit
 
 struct ConnectionHealthView: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var diagnostics = ConnectionDiagnosticsCoordinator()
     @State private var isShowingDeviceSetup = false
+    @State private var didCopyDiagnostics = false
 
     var body: some View {
         List {
@@ -75,14 +77,20 @@ struct ConnectionHealthView: View {
             }
 
             Section {
-                ShareLink(
-                    item: diagnosticsText,
-                    subject: Text("Roam Control Diagnostics")
-                ) {
-                    Label("Share Diagnostics", systemImage: "square.and.arrow.up")
+                Button {
+                    UIPasteboard.general.string = diagnosticsText
+                    didCopyDiagnostics = true
+                } label: {
+                    Label(
+                        didCopyDiagnostics ? "Diagnostics Copied" : "Copy Diagnostics",
+                        systemImage: didCopyDiagnostics ? "checkmark" : "doc.on.doc"
+                    )
                 }
+                .foregroundStyle(didCopyDiagnostics ? .green : .primary)
+            } header: {
+                Text("Support")
             } footer: {
-                Text("Choose where to send or save the report using the iOS share sheet. It never includes pairing keys or PINs.")
+                Text("Copies a status-only report you can paste into a bug report. It never includes locations, searches, pairing records, PINs, device names or error text.")
             }
 
             Section("Help") {
@@ -297,21 +305,20 @@ struct ConnectionHealthView: View {
         Pairing: \(pairingValue)
         LocalDevVPN: \(localDevVPNValue)
         Session: \(sessionValue)
-        Active place: \(activeTarget?.name ?? "None")
-        Coordinates: \(coordinatesValue)
         Last connection check: \(checked)
-        Connection check result: \(diagnosticResultText)
+        Connection check result: \(diagnosticResultStatus)
         Appearance: \(appModel.appearance.title)
         Map style: \(appModel.mapDisplayStyle.title)
+        Location data: Not included
         """
     }
 
-    private var diagnosticResultText: String {
+    private var diagnosticResultStatus: String {
         switch diagnostics.state {
         case .notRun: "Not run"
         case .running: "Running"
-        case .passed(let message): "Passed — \(message)"
-        case .failed(let message): "Failed — \(message)"
+        case .passed: "Passed"
+        case .failed: "Failed"
         }
     }
 }

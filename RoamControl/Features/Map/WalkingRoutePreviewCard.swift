@@ -32,14 +32,14 @@ struct WalkingRoutePreviewCard: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 18, y: 8)
         .confirmationDialog(
-            "Stop walking and restore your real location?",
+            "Stop walking and restore this iPhone's real location?",
             isPresented: $isConfirmingStop,
             titleVisibility: .visible
         ) {
             Button("Stop & Restore", role: .destructive, action: onStop)
-            Button("Keep Walking", role: .cancel) {}
+            Button("Keep Simulated Location", role: .cancel) {}
         } message: {
-            Text("Your route progress will be reset.")
+            Text("Roam Control will end the simulated walk and restore your real location. Your route progress will be reset.")
         }
     }
 
@@ -203,7 +203,7 @@ struct WalkingRoutePreviewCard: View {
         case .stopping:
             HStack(spacing: 10) {
                 ProgressView()
-                Text("Restoring real location…")
+                Text("Restoring this iPhone's real location…")
                     .font(.subheadline.weight(.medium))
             }
             .frame(maxWidth: .infinity)
@@ -317,7 +317,11 @@ struct WalkingRoutePreviewCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
         case .stopping:
-            EmptyView()
+            Text("Keep Roam Control open until the real location has been restored.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .fixedSize(horizontal: false, vertical: true)
 
         case .failed(let message):
             Text(message)

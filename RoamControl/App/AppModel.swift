@@ -6,8 +6,8 @@ import Observation
 final class AppModel {
     private static let onboardingKey = "hasCompletedOnboarding"
     private static let favouritesKey = "favouriteLocations"
+    private static let hasSeenFavouriteReorderHintKey = "hasSeenFavouriteReorderHint"
     private static let historyKey = "locationHistory"
-    private static let dismissedResumeLocationKey = "dismissedResumeLocation"
     private static let appearanceKey = "appAppearance"
     private static let mapDisplayStyleKey = "mapDisplayStyle"
     private static let activeSessionRecoveryKey = "activeSessionRecovery"
@@ -21,8 +21,8 @@ final class AppModel {
     private(set) var pairingStatus: PairingStatus = .checking
     private(set) var selectedTarget: LocationTarget?
     private(set) var favouriteLocations: [LocationTarget]
+    private(set) var hasSeenFavouriteReorderHint: Bool
     private(set) var locationHistory: [LocationTarget]
-    private(set) var dismissedResumeLocationID: String?
     private(set) var appearance: AppAppearance
     private(set) var mapDisplayStyle: MapDisplayStyle
     private(set) var sharesAnonymousUsageStatistics: Bool
@@ -33,6 +33,8 @@ final class AppModel {
     private var activeSessionRecovery: SessionRecoveryRecord?
     private var lastRecoverySaveDate: Date?
     private var restorationReachedActiveSession = false
+    private var restorationWasCancelled = false
+    private var isStoppingLocationSessionForRestoration = false
     private var pendingSessionAnalyticsEvent: UsageAnalyticsEvent?
 
     let pairingService: any PairingService
@@ -53,8 +55,8 @@ final class AppModel {
         let hasCompletedOnboarding = preferences.bool(forKey: Self.onboardingKey)
         self.hasCompletedOnboarding = hasCompletedOnboarding
         self.favouriteLocations = Self.locations(forKey: Self.favouritesKey, in: preferences)
+        self.hasSeenFavouriteReorderHint = preferences.bool(forKey: Self.hasSeenFavouriteReorderHintKey)
         self.locationHistory = Self.locations(forKey: Self.historyKey, in: preferences)
-        self.dismissedResumeLocationID = preferences.string(forKey: Self.dismissedResumeLocationKey)
         self.appearance = AppAppearance(
             rawValue: preferences.string(forKey: Self.appearanceKey) ?? ""
         ) ?? .automatic
@@ -69,6 +71,13 @@ final class AppModel {
         deviceSession.onPhaseChange = { [weak self] phase in
             self?.applyDeviceSessionPhase(phase)
         }
+        onDevicePairing.onPhaseChange = { [weak self] phase in
+            guard case .failed = phase else { return }
+            self?.usageAnalytics.record(
+                .pairingFailed,
+                enabled: self?.sharesAnonymousUsageStatistics ?? false
+            )
+        }
 
         if hasCompletedOnboarding {
             usageAnalytics.recordActivation(enabled: sharesAnonymousUsageStatistics)
@@ -78,17 +87,6 @@ final class AppModel {
     func chooseTarget(_ target: LocationTarget) {
         selectedTarget = target
         addToHistory(target)
-    }
-
-    var resumeLocation: LocationTarget? {
-        guard let lastLocation = locationHistory.first else { return nil }
-        return lastLocation.id == dismissedResumeLocationID ? nil : lastLocation
-    }
-
-    func dismissResumeLocation() {
-        guard let lastLocation = locationHistory.first else { return }
-        dismissedResumeLocationID = lastLocation.id
-        preferences.set(lastLocation.id, forKey: Self.dismissedResumeLocationKey)
     }
 
     func isFavourite(_ target: LocationTarget) -> Bool {
@@ -107,6 +105,18 @@ final class AppModel {
     func removeFavourite(_ target: LocationTarget) {
         favouriteLocations.removeAll { $0.id == target.id }
         save(favouriteLocations, forKey: Self.favouritesKey)
+    }
+
+    func moveFavouriteLocations(from source: IndexSet, to destination: Int) {
+        favouriteLocations.move(fromOffsets: source, toOffset: destination)
+        save(favouriteLocations, forKey: Self.favouritesKey)
+        dismissFavouriteReorderHint()
+    }
+
+    func dismissFavouriteReorderHint() {
+        guard !hasSeenFavouriteReorderHint else { return }
+        hasSeenFavouriteReorderHint = true
+        preferences.set(true, forKey: Self.hasSeenFavouriteReorderHintKey)
     }
 
     func renameFavourite(_ target: LocationTarget, to proposedName: String) {
@@ -136,7 +146,6 @@ final class AppModel {
 
     func clearLocationHistory() {
         locationHistory = []
-        dismissedResumeLocationID = nil
         preferences.removeObject(forKey: Self.historyKey)
     }
 
@@ -206,6 +215,7 @@ final class AppModel {
         activeSessionRecovery = nil
         isRestoringInterruptedSession = false
         interruptedSessionError = nil
+        restorationWasCancelled = false
         pairingStatus = .notPaired
         connectionState = .notConfigured
         shouldPresentDeviceSetup = false
@@ -229,6 +239,7 @@ final class AppModel {
         } catch {
             pairingStatus = .failed(message: error.localizedDescription)
             connectionState = .failed(message: error.localizedDescription)
+            usageAnalytics.record(.pairingFailed, enabled: sharesAnonymousUsageStatistics)
         }
     }
 
@@ -242,6 +253,7 @@ final class AppModel {
         } catch {
             pairingStatus = .failed(message: error.localizedDescription)
             connectionState = .failed(message: error.localizedDescription)
+            usageAnalytics.record(.pairingFailed, enabled: sharesAnonymousUsageStatistics)
         }
     }
 
@@ -310,8 +322,6 @@ final class AppModel {
         dismissInterruptedSessionRecovery()
         activeSessionRecovery = recovery
         lastRecoverySaveDate = nil
-        dismissedResumeLocationID = nil
-        preferences.removeObject(forKey: Self.dismissedResumeLocationKey)
         addToHistory(historyTarget)
         switch deviceSession.updateLocation(deviceTarget) {
         case .updated:
@@ -332,6 +342,10 @@ final class AppModel {
                 pendingSessionAnalyticsEvent = nil
                 pairingStatus = .notPaired
                 connectionState = .notConfigured
+                usageAnalytics.record(
+                    .locationPreparationFailed,
+                    enabled: sharesAnonymousUsageStatistics
+                )
                 return
             }
             pendingSessionAnalyticsEvent = recovery.kind == .walkingRoute
@@ -342,6 +356,10 @@ final class AppModel {
             activeSessionRecovery = nil
             pendingSessionAnalyticsEvent = nil
             connectionState = .failed(message: error.localizedDescription)
+            usageAnalytics.record(
+                .locationPreparationFailed,
+                enabled: sharesAnonymousUsageStatistics
+            )
         }
     }
 
@@ -355,11 +373,13 @@ final class AppModel {
         interruptedSessionError = nil
         isRestoringInterruptedSession = true
         restorationReachedActiveSession = false
+        restorationWasCancelled = false
 
         do {
             guard let pairingRecord = try await pairingService.pairingRecordData() else {
                 isRestoringInterruptedSession = false
                 interruptedSessionError = "The saved pairing record is unavailable. Pair this iPhone again."
+                usageAnalytics.record(.locationRestoreFailed, enabled: sharesAnonymousUsageStatistics)
                 return
             }
             deviceSession.start(
@@ -369,11 +389,13 @@ final class AppModel {
         } catch {
             isRestoringInterruptedSession = false
             interruptedSessionError = error.localizedDescription
+            usageAnalytics.record(.locationRestoreFailed, enabled: sharesAnonymousUsageStatistics)
         }
     }
 
     func cancelInterruptedSessionRestoration() {
         guard isRestoringInterruptedSession else { return }
+        restorationWasCancelled = true
         deviceSession.stop()
     }
 
@@ -390,6 +412,7 @@ final class AppModel {
     }
 
     func stopLocationSession() {
+        isStoppingLocationSessionForRestoration = true
         deviceSession.stop()
     }
 
@@ -426,10 +449,12 @@ final class AppModel {
         switch phase {
         case .idle:
             pendingSessionAnalyticsEvent = nil
+            isStoppingLocationSessionForRestoration = false
             if isRestoringInterruptedSession {
-                let didRestore = restorationReachedActiveSession
+                let didRestore = restorationReachedActiveSession && !restorationWasCancelled
                 isRestoringInterruptedSession = false
                 restorationReachedActiveSession = false
+                restorationWasCancelled = false
                 if didRestore {
                     dismissInterruptedSessionRecovery()
                 }
@@ -444,6 +469,7 @@ final class AppModel {
             connectionState = .connecting
         case .active(let target):
             connectionState = .active
+            isStoppingLocationSessionForRestoration = false
             if let event = pendingSessionAnalyticsEvent {
                 usageAnalytics.record(event, enabled: sharesAnonymousUsageStatistics)
                 pendingSessionAnalyticsEvent = nil
@@ -452,7 +478,11 @@ final class AppModel {
                 restorationReachedActiveSession = true
                 Task { @MainActor [weak self] in
                     try? await Task.sleep(for: .milliseconds(400))
-                    guard let self, self.isRestoringInterruptedSession else { return }
+                    guard
+                        let self,
+                        self.isRestoringInterruptedSession,
+                        !self.restorationWasCancelled
+                    else { return }
                     if self.deviceSession.mobileDataGuidance != .turnBackOn {
                         self.deviceSession.stop()
                     }
@@ -463,14 +493,37 @@ final class AppModel {
         case .failed(let message):
             pendingSessionAnalyticsEvent = nil
             connectionState = .failed(message: message)
-            if isRestoringInterruptedSession {
+            if isRestoringInterruptedSession || isStoppingLocationSessionForRestoration {
+                let wasRestoringInterruptedSession = isRestoringInterruptedSession
+                if !restorationWasCancelled {
+                    usageAnalytics.record(.locationRestoreFailed, enabled: sharesAnonymousUsageStatistics)
+                }
                 isRestoringInterruptedSession = false
                 restorationReachedActiveSession = false
-                interruptedSessionError = message
+                restorationWasCancelled = false
+                isStoppingLocationSessionForRestoration = false
+                if wasRestoringInterruptedSession {
+                    interruptedSessionError = message
+                }
             } else {
+                usageAnalytics.record(
+                    analyticsEvent(forLocationStartFailure: message),
+                    enabled: sharesAnonymousUsageStatistics
+                )
                 clearActiveSessionRecovery()
             }
         }
+    }
+
+    private func analyticsEvent(forLocationStartFailure message: String) -> UsageAnalyticsEvent {
+        let normalizedMessage = message.lowercased()
+        if normalizedMessage.contains("localdevvpn") {
+            return .localDevVPNUnreachable
+        }
+        if normalizedMessage.contains("prepare") {
+            return .locationPreparationFailed
+        }
+        return .locationStartFailed
     }
 
     private func persistActiveSessionRecovery(at target: LocationTarget) {

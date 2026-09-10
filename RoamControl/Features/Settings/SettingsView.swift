@@ -1,6 +1,13 @@
 import SwiftUI
 
 struct SettingsView: View {
+    private static let bugReportURL = URL(
+        string: "https://github.com/seanhowarthdev/Roam-Control/issues/new?template=bug_report.yml"
+    )!
+    private static let featureRequestURL = URL(
+        string: "https://github.com/seanhowarthdev/Roam-Control/issues/new?template=feature_request.yml"
+    )!
+
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -8,6 +15,7 @@ struct SettingsView: View {
     @State private var isReplayingOnboarding = false
     @State private var isConfirmingReset = false
     @State private var resetError: String?
+    @State private var releaseUpdateStatus: ReleaseUpdateStatus = .idle
 
     var body: some View {
         NavigationStack {
@@ -84,6 +92,35 @@ struct SettingsView: View {
                         Label("Replay Introduction", systemImage: "sparkles")
                     }
                     .foregroundStyle(.primary)
+                }
+
+                Section {
+                    Button {
+                        Task { await checkForUpdates() }
+                    } label: {
+                        Label(updateCheckTitle, systemImage: updateCheckSymbol)
+                    }
+                    .disabled(releaseUpdateStatus == .checking)
+
+                    updateStatusDetail
+                } header: {
+                    Text("Updates")
+                } footer: {
+                    Text("Checks the public GitHub release only when you tap it. Roam Control never sends location, pairing or diagnostic data with this request.")
+                }
+
+                Section {
+                    Link(destination: Self.bugReportURL) {
+                        Label("Report a Bug", systemImage: "ladybug")
+                    }
+
+                    Link(destination: Self.featureRequestURL) {
+                        Label("Request a Feature", systemImage: "lightbulb")
+                    }
+                } header: {
+                    Text("Feedback")
+                } footer: {
+                    Text("GitHub may ask you to choose Bug Report or Feature Request first. For pairing or connection problems, open Connection Health and use Copy Diagnostics. Do not include pairing records, credentials or private locations.")
                 }
 
                 Section {
@@ -262,6 +299,71 @@ struct SettingsView: View {
         else { return "Unknown" }
 
         return buildDate.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    private var updateCheckTitle: String {
+        switch releaseUpdateStatus {
+        case .checking: "Checking for Updates…"
+        default: "Check for Updates"
+        }
+    }
+
+    private var updateCheckSymbol: String {
+        releaseUpdateStatus == .checking ? "arrow.triangle.2.circlepath" : "arrow.down.circle"
+    }
+
+    @ViewBuilder
+    private var updateStatusDetail: some View {
+        switch releaseUpdateStatus {
+        case .idle, .checking:
+            EmptyView()
+        case .updateAvailable(let release):
+            Link(destination: release.releaseURL) {
+                Label("Install \(release.version)", systemImage: "arrow.up.right.square")
+            }
+            Text("A newer public release is available: \(release.name).")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        case .current(let release):
+            Label("You have the latest public release (\(release.version)).", systemImage: "checkmark.circle")
+                .font(.subheadline)
+                .foregroundStyle(.green)
+        case .newerLocalBuild(let release):
+            Link(destination: release.releaseURL) {
+                Label("View public release \(release.version)", systemImage: "arrow.up.right.square")
+            }
+            Text("You are using a newer local test build (\(versionText) Build \(buildNumberText)).")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        case .noPublishedRelease:
+            Label("No public GitHub release has been published yet.", systemImage: "clock")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        case .unavailable:
+            Label("Couldn’t check GitHub right now. Try again later.", systemImage: "exclamationmark.triangle")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @MainActor
+    private func checkForUpdates() async {
+        releaseUpdateStatus = .checking
+
+        do {
+            let release = try await ReleaseUpdateChecker().latestRelease()
+            if VersionComparison.isRemoteVersionNewer(release.version, than: versionText) {
+                releaseUpdateStatus = .updateAvailable(release)
+            } else if VersionComparison.isRemoteVersionNewer(versionText, than: release.version) {
+                releaseUpdateStatus = .newerLocalBuild(release)
+            } else {
+                releaseUpdateStatus = .current(release)
+            }
+        } catch ReleaseUpdateCheckError.noPublishedRelease {
+            releaseUpdateStatus = .noPublishedRelease
+        } catch {
+            releaseUpdateStatus = .unavailable
+        }
     }
 
     private var isShowingResetError: Binding<Bool> {

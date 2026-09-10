@@ -21,18 +21,17 @@ struct SearchSuggestionsView: View {
                                 .foregroundStyle(.primary)
                                 .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
 
-                            if !suggestion.subtitle.isEmpty {
-                                Text(suggestion.subtitle)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
-                            }
+                            Text(visibleSubtitle(for: suggestion))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
 
                         Spacer()
                     }
                     .padding(.horizontal, 14)
-                    .frame(minHeight: 50)
+                    .frame(minHeight: 58)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(accessibilityLabel(for: suggestion))
@@ -49,7 +48,14 @@ struct SearchSuggestionsView: View {
     }
 
     private func accessibilityLabel(for suggestion: MapSearchSuggestion) -> String {
-        guard !suggestion.subtitle.isEmpty else { return suggestion.title }
-        return "\(suggestion.title), \(suggestion.subtitle)"
+        "\(suggestion.title), \(visibleSubtitle(for: suggestion))"
+    }
+
+    private func visibleSubtitle(for suggestion: MapSearchSuggestion) -> String {
+        let invisibleCharacters = CharacterSet.whitespacesAndNewlines.union(
+            CharacterSet(charactersIn: "\u{200B}\u{200C}\u{200D}\u{FEFF}")
+        )
+        let detail = suggestion.subtitle.trimmingCharacters(in: invisibleCharacters)
+        return detail.isEmpty ? "Location details unavailable" : detail
     }
 }

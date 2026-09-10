@@ -20,17 +20,12 @@ struct AboutRoamControlView: View {
                 guideRow(
                     "Favourite",
                     symbol: "heart",
-                    text: "Save the selected place for quick use later. Favourites can be renamed or removed from the saved-locations screen."
+                    text: "Save the selected place for quick use later. Favourites can be renamed, reordered or removed from the saved-locations screen."
                 )
                 guideRow(
                     "Favourites & history",
                     symbol: "list.bullet.rectangle",
                     text: "Open saved favourites and recently used locations. Swipe an item to remove it."
-                )
-                guideRow(
-                    "Resume last location",
-                    symbol: "arrow.clockwise",
-                    text: "Quickly select your most recent location again. Use its close button if you no longer want the suggestion."
                 )
             }
 
@@ -69,9 +64,9 @@ struct AboutRoamControlView: View {
                     text: "Move an active location session to a newly selected place without restarting the whole connection flow."
                 )
                 guideRow(
-                    "Stop Location",
+                    "Stop & Restore",
                     symbol: "location.slash.fill",
-                    text: "End the active session and restore this iPhone’s real location."
+                    text: "Confirm before ending the active session and restoring this iPhone’s real location."
                 )
                 guideRow(
                     "Mobile-data guidance",

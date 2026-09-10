@@ -39,7 +39,7 @@ There is no separate confirmation step after choosing a location.
 
 To move an active session, choose another place and tap **Update Location**. Roam Control keeps the existing secure session and changes the location directly.
 
-Tap **Stop Location** when you want iOS to return to the real location. Roam Control deliberately does not place a stop control in the Dynamic Island, which helps prevent accidental stops while using another app.
+Tap **Stop & Restore** when you want iOS to return to the real location, then confirm the choice. Keep Roam Control open while it restores the real location. Roam Control deliberately does not place a stop control in the Dynamic Island, which helps prevent accidental stops while using another app.
 
 ## Wi-Fi connection flow
 
@@ -93,7 +93,11 @@ For UK regional settings, short distances are shown in yards and longer distance
 - **Compass** appears after the map is rotated. It shows N, E, S and W; tap it to face north again.
 - **Connection status** opens pairing and connection setup.
 - **Favourites and history** opens saved places. Swipe an item to delete it; swipe a favourite to rename it.
-- **Settings** controls appearance, map style, diagnostics, pairing, help and reset.
+- **Settings** controls appearance, map style, diagnostics, pairing, feedback, help and reset.
+
+## Feedback
+
+Under **Settings → Feedback**, **Report a Bug** and **Request a Feature** open the matching GitHub form. Do not include pairing records, credentials or private locations in a report.
 
 ## Interrupted-session recovery
 
@@ -109,6 +113,10 @@ Nothing starts automatically from this screen.
 ## Appearance and accessibility
 
 Settings offers automatic, light and dark appearance plus standard, satellite and hybrid maps. Roam Control follows iOS Dynamic Type, VoiceOver and Reduce Motion settings. At accessibility text sizes, cards and pop-ups can scroll so their controls remain reachable.
+
+## Background sessions
+
+An active location session uses an iOS continued-processing task so it can remain reliable while Roam Control is in the background. iOS shows this task in the Dynamic Island and controls its presentation. You can swipe it up to keep it compact, but Roam Control continues to report task progress so iOS can keep the session running reliably.
 
 ## Anonymous usage statistics
 

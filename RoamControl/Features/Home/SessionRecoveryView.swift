@@ -13,6 +13,8 @@ struct SessionRecoveryView: View {
     let onAlreadyRestored: () -> Void
     let onCancel: () -> Void
 
+    @State private var isConfirmingRestore = false
+
     var body: some View {
         Group {
             if dynamicTypeSize.isAccessibilitySize {
@@ -34,6 +36,16 @@ struct SessionRecoveryView: View {
                 .stroke(.white.opacity(0.16), lineWidth: 1)
         }
         .shadow(color: .black.opacity(0.24), radius: 28, y: 12)
+        .confirmationDialog(
+            "Restore this iPhone's real location?",
+            isPresented: $isConfirmingRestore,
+            titleVisibility: .visible
+        ) {
+            Button("Restore Real Location", role: .destructive, action: onRestore)
+            Button("Keep Recovery Options", role: .cancel) {}
+        } message: {
+            Text("Roam Control will reconnect only long enough to clear the simulated location. It will not start a new location or walking session.")
+        }
     }
 
     private var content: some View {
@@ -99,12 +111,12 @@ struct SessionRecoveryView: View {
             if isResuming || isRestoring {
                 HStack(spacing: 10) {
                     ProgressView()
-                    Text(isRestoring ? "Restoring real location…" : "Preparing the route…")
+                    Text(isRestoring ? "Restoring this iPhone's real location…" : "Preparing the route…")
                         .font(.subheadline.weight(.semibold))
                 }
                 .frame(maxWidth: .infinity)
 
-                Button("Cancel", role: .cancel, action: onCancel)
+                Button("Cancel Restoration", role: .cancel, action: onCancel)
                     .foregroundStyle(.secondary)
             } else {
                 Button(action: onResume) {
@@ -115,7 +127,9 @@ struct SessionRecoveryView: View {
                 .controlSize(.large)
                 .disabled(!isPaired)
 
-                Button(role: .destructive, action: onRestore) {
+                Button(role: .destructive) {
+                    isConfirmingRestore = true
+                } label: {
                     Label("Restore Real Location", systemImage: "location.slash.fill")
                         .frame(maxWidth: .infinity)
                 }
@@ -143,7 +157,7 @@ struct SessionRecoveryView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("Restoring reconnects only long enough to clear the simulated location. Nothing starts automatically.")
+            Text("Restoring reconnects only long enough to clear the simulated location. Nothing starts automatically. Keep Roam Control open until it finishes.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
@@ -153,10 +167,10 @@ struct SessionRecoveryView: View {
 
     private var summaryText: String {
         if let destination = recovery.destination, recovery.isWalkingRoute {
-            return "Roam Control did not receive a normal end signal while walking to \(destination.name). You can continue from the last saved point or safely restore your real location."
+            return "Roam Control closed before it could confirm that the simulated walk to \(destination.name) ended. Continue from the last saved point or restore this iPhone's real location."
         }
 
-        return "Roam Control did not receive a normal end signal for the location at \(recovery.lastReportedLocation.name). Choose what this iPhone should do next."
+        return "Roam Control closed before it could confirm that the simulated location at \(recovery.lastReportedLocation.name) ended. Choose what this iPhone should do next."
     }
 
     private var resumeTitle: String {

@@ -62,6 +62,7 @@ final class MapViewModel: NSObject, MKLocalSearchCompleterDelegate {
 
         guard trimmedQuery.count >= 2 else {
             searchSuggestions = []
+            searchCompleter.queryFragment = ""
             return
         }
 
@@ -153,12 +154,16 @@ final class MapViewModel: NSObject, MKLocalSearchCompleterDelegate {
     func showRealLocationAfterSession() {
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .milliseconds(900))
-            self?.requestCurrentLocation(
-                recenter: true,
-                reportErrors: true,
-                requireFreshLocation: true
-            )
+            self?.refreshRealLocationAfterRestoration()
         }
+    }
+
+    func refreshRealLocationAfterRestoration() {
+        requestCurrentLocation(
+            recenter: true,
+            reportErrors: true,
+            requireFreshLocation: true
+        )
     }
 
     func showCurrentLocation() {
@@ -342,13 +347,22 @@ final class MapViewModel: NSObject, MKLocalSearchCompleterDelegate {
     }
 
     private func placeDescription(for item: MKMapItem) -> String {
-        if let shortAddress = item.address?.shortAddress, !shortAddress.isEmpty {
-            return shortAddress
+        let invisibleCharacters = CharacterSet.whitespacesAndNewlines.union(
+            CharacterSet(charactersIn: "\u{200B}\u{200C}\u{200D}\u{FEFF}")
+        )
+        let candidates = [
+            item.address?.shortAddress,
+            item.addressRepresentations?.cityWithContext,
+            item.address?.fullAddress
+        ]
+
+        for candidate in candidates {
+            let detail = candidate?.trimmingCharacters(in: invisibleCharacters) ?? ""
+            if !detail.isEmpty {
+                return detail
+            }
         }
-        if let city = item.addressRepresentations?.cityWithContext, !city.isEmpty {
-            return city
-        }
-        return "Map search result"
+        return "Location details unavailable"
     }
 
     private func requestCurrentLocation(
@@ -377,15 +391,24 @@ final class MapViewModel: NSObject, MKLocalSearchCompleterDelegate {
                 }
 
                 guard let self, self.locationRequestStartedAt != nil else { return }
+                // A simulated-location session can take a little longer than a
+                // normal location request to hand control back to Core Location.
+                // Do not turn a delayed, fresh callback into an error after the
+                // session itself has already ended.
+                self.isFindingRealLocation = false
+                self.errorMessage = nil
+
+                do {
+                    try await Task.sleep(for: .seconds(45))
+                } catch {
+                    return
+                }
+
+                guard self.locationRequestStartedAt != nil else { return }
                 self.locationManager.stopUpdatingLocation()
                 self.locationRequestStartedAt = nil
-                self.isFindingRealLocation = false
-                if self.recenterOnNextRealLocation {
-                    self.recenterOnNextRealLocation = false
-                    if self.shouldReportLocationErrors {
-                        self.errorMessage = "Still finding your real location. Tap the location button to try again."
-                    }
-                }
+                self.recenterOnNextRealLocation = false
+                self.requiresFreshRealLocation = false
             }
         case .denied, .restricted:
             isFindingRealLocation = false

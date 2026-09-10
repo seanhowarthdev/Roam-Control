@@ -12,13 +12,17 @@ struct SavedPlacesView: View {
     @State private var favouriteBeingRenamed: LocationTarget?
     @State private var favouriteName = ""
     @State private var clearTarget: ClearTarget?
+    @State private var editMode: EditMode = .inactive
 
     let favourites: [LocationTarget]
     let history: [LocationTarget]
+    let shouldShowFavouriteReorderHint: Bool
     let isFavourite: (LocationTarget) -> Bool
     let onSelect: (LocationTarget) -> Void
     let onToggleFavourite: (LocationTarget) -> Void
     let onDeleteFavourite: (LocationTarget) -> Void
+    let onMoveFavourites: (IndexSet, Int) -> Void
+    let onDismissFavouriteReorderHint: () -> Void
     let onRenameFavourite: (LocationTarget, String) -> Void
     let onDeleteHistory: (LocationTarget) -> Void
     let onClearFavourites: () -> Void
@@ -57,6 +61,7 @@ struct SavedPlacesView: View {
                                 .tint(.blue)
                             }
                         }
+                        .onMove(perform: onMoveFavourites)
                     }
                 } header: {
                     HStack {
@@ -68,6 +73,10 @@ struct SavedPlacesView: View {
                             }
                             .textCase(nil)
                         }
+                    }
+                } footer: {
+                    if shouldShowFavouriteReorderHint && favourites.count >= 2 {
+                        Text("Tap Edit to rearrange favourites.")
                     }
                 }
 
@@ -108,9 +117,21 @@ struct SavedPlacesView: View {
                     }
                 }
             }
+            .environment(\.editMode, $editMode)
             .navigationTitle("Saved Places")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                if !favourites.isEmpty {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(editMode.isEditing ? "Done" : "Edit") {
+                            if !editMode.isEditing {
+                                onDismissFavouriteReorderHint()
+                            }
+                            editMode = editMode.isEditing ? .inactive : .active
+                        }
+                            .accessibilityLabel("Reorder favourites")
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }

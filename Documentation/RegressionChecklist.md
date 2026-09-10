@@ -49,7 +49,7 @@ Use this checklist before packaging an IPA or declaring a development build stab
 - [ ] With LocalDevVPN disconnected, Roam Control opens it quickly and resumes automatically.
 - [ ] Selecting another place and tapping Update Location changes the active location without restarting the flow.
 - [ ] The active location persists while using another app.
-- [ ] Stop Location restores the real location.
+- [ ] Stop & Restore requires confirmation, then restores the real location.
 - [ ] The Dynamic Island activity has no accidental stop button.
 
 ## Fixed location on mobile data
@@ -80,7 +80,9 @@ Use this checklist before packaging an IPA or declaring a development build stab
 
 - [ ] Force-closing during a fixed session shows interrupted-session recovery on relaunch.
 - [ ] Resume Location reconnects to the saved location.
-- [ ] Restore Real Location clears the simulated location.
+- [ ] Restore Real Location requires confirmation, clears the simulated location and leaves no new session active.
+- [ ] Cancelling recovery restoration preserves the interrupted-session recovery options.
+- [ ] Stop & Restore shows restoration progress for at least a moment before returning to Ready.
 - [ ] My Real Location Is Already Back dismisses the recovery state.
 - [ ] Force-closing during a walk offers Resume Walking from a recent saved point.
 - [ ] Mobile-data recovery waits until data can be restored before finishing.
@@ -90,6 +92,7 @@ Use this checklist before packaging an IPA or declaring a development build stab
 - [ ] Automatic, Light and Dark update the Settings screen immediately.
 - [ ] Standard, Satellite and Hybrid update the map.
 - [ ] Connection Health reports pairing, LocalDevVPN and location-session state accurately.
+- [ ] Feedback links open the correct Bug Report and Feature Request forms.
 - [ ] Share Diagnostics opens the iOS share sheet and contains no keys or PINs.
 - [ ] About Roam Control describes the current controls and flows.
 - [ ] Replay Introduction does not delete app data.
