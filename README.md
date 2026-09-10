@@ -9,14 +9,14 @@
 </p>
 
 <p align="center">
-  <strong>Public beta:</strong> 0.9.0 (Build 29) · <strong>Requires:</strong> iOS 27+
+  <strong>Public beta:</strong> 0.9.1 (Build 47) · <strong>Requires:</strong> iOS 27+
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/iOS-27%2B-blue" alt="iOS 27+">
   <img src="https://img.shields.io/badge/UI-SwiftUI-orange" alt="SwiftUI">
-  <img src="https://img.shields.io/badge/Beta-0.9.0-purple" alt="Beta 0.9.0">
-  <img src="https://img.shields.io/badge/Build-29-lightgrey" alt="Build 29">
+  <img src="https://img.shields.io/badge/Beta-0.9.1-purple" alt="Beta 0.9.1">
+  <img src="https://img.shields.io/badge/Build-47-lightgrey" alt="Build 47">
   <img src="https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue" alt="PolyForm Noncommercial 1.0.0">
 </p>
 
@@ -122,6 +122,7 @@ The native engine is a narrow Rust-to-Swift bridge around the MIT-licensed [`ide
 - [Responsible use](Documentation/ResponsibleUse.md)
 - [Build and release guide](Documentation/BuildAndRelease.md)
 - [Regression checklist](Documentation/RegressionChecklist.md)
+- [0.9.1 release notes](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.1)
 - [Beta 1 release notes](Documentation/PublicBetaRelease.md)
 - [Security policy](SECURITY.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
