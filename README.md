@@ -9,13 +9,13 @@
 </p>
 
 <p align="center">
-  <strong>Public beta:</strong> 0.9.1 (Build 47) · <strong>Requires:</strong> iOS 27+
+  <strong>Public beta:</strong> 0.9.1 Beta 2 (Build 47) · <strong>Requires:</strong> iOS 27+
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/iOS-27%2B-blue" alt="iOS 27+">
   <img src="https://img.shields.io/badge/UI-SwiftUI-orange" alt="SwiftUI">
-  <img src="https://img.shields.io/badge/Beta-0.9.1-purple" alt="Beta 0.9.1">
+  <img src="https://img.shields.io/badge/Beta-2-purple" alt="Beta 2">
   <img src="https://img.shields.io/badge/Build-47-lightgrey" alt="Build 47">
   <img src="https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue" alt="PolyForm Noncommercial 1.0.0">
 </p>

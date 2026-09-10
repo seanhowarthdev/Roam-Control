@@ -13,7 +13,7 @@ Read the [installation guide](Installation.md), [privacy explanation](Privacy.md
 
 ## Download
 
-Download `RoamControl-0.9.0-build29.ipa` from the GitHub Release assets.
+The original `RoamControl-0.9.0-build29.ipa` asset has been removed because this release has been superseded by v0.9.1. The Beta 1 source snapshot remains available under its original MIT Licence.
 
 SHA-256:
 

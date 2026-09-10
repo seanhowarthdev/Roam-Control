@@ -33,16 +33,12 @@ The simulator can test the interface but cannot complete the physical iPhone pai
 
 ## Verify a release
 
-Each GitHub Release should publish the IPA's SHA-256 checksum. On a Mac, compare it with:
+Each GitHub Release publishes the IPA's SHA-256 checksum. On a Mac, calculate the checksum of the IPA you downloaded:
 
 ```sh
-shasum -a 256 RoamControl-0.9.0-build29.ipa
+shasum -a 256 RoamControl-0.9.1-build47.ipa
 ```
 
-For Build 29, the expected checksum is:
-
-```text
-3ad8d5cb1151dabd8b4c29a065d46501095f07c74c8e92e45d845822dcfe1e7b
-```
+Compare the result with the SHA-256 value shown on the matching GitHub Release before installing it.
 
 See the [user guide](UserGuide.md) for pairing and everyday operation.
