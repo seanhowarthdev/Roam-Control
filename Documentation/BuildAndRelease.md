@@ -4,8 +4,8 @@ This guide covers Roam Control's development builds and the planned IPA workflow
 
 ## Current release identity
 
-- Marketing version: `0.9.0`
-- Current build: `29`
+- Marketing version: `0.9.1`
+- Current build: `47`
 - Bundle identifier: `com.sean.roamcontrol`
 - Minimum deployment target: iOS 27
 - Supported device family: iPhone
@@ -16,7 +16,7 @@ The version and build are shown in **Settings** inside the app. The built date a
 
 Roam Control uses two separate numbers:
 
-- The **version** describes the public release. Development stays on `0.9.0` until the first stable release, which will become `1.0.0`.
+- The **version** describes the public release. Increase it for each public beta or stable release; the first stable release will become `1.0.0`.
 - The **build** identifies one exact install. Increase it once for every build installed on a test iPhone or packaged as an IPA.
 
 Ordinary compile checks do not consume a build number. Build numbers must never move backwards for a later install or upload.
