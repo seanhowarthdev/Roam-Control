@@ -32,8 +32,25 @@ final class OnDevicePairingCoordinator {
     }
 
     private(set) var phase: OnDevicePairingPhase = .idle {
-        didSet { onPhaseChange?(phase) }
+        didSet {
+            guard phase != oldValue else { return }
+            if case .failed(let message) = phase {
+                guard !terminalFailureReported else { return }
+                terminalFailureReported = true
+                let stage = schedulerFailureReason == nil
+                    ? FailureStage.classify(message, fallback: .pairingUnknown) : .schedulerSubmission
+                lastFailureStage = stage
+                onFailure?(stage)
+            }
+            onPhaseChange?(phase)
+        }
     }
+
+    private(set) var lastFailureStage: FailureStage?
+    private(set) var schedulerFailureReason: SchedulerFailureReason?
+
+    private var terminalFailureReported = false
+    var onFailure: ((FailureStage) -> Void)?
 
     var onPhaseChange: ((OnDevicePairingPhase) -> Void)?
 
@@ -47,9 +64,10 @@ final class OnDevicePairingCoordinator {
     private var pendingFailureMessage: String?
     private var backgroundTaskFinished = true
     private var workerIsRunning = false
+    private var storageIsRunning = false
 
     var isRunning: Bool {
-        workerIsRunning || phase == .preparing
+        workerIsRunning || storageIsRunning || phase == .preparing
     }
 
     var isAvailableOnThisDevice: Bool {
@@ -76,6 +94,9 @@ final class OnDevicePairingCoordinator {
         }
         guard !isRunning else { return }
 
+        terminalFailureReported = false
+        lastFailureStage = nil
+        schedulerFailureReason = nil
         cancellationRequested = false
         pendingFailureMessage = nil
         recordStore = storeRecord
@@ -92,6 +113,11 @@ final class OnDevicePairingCoordinator {
             }
 
             MainActor.assumeIsolated {
+                guard Self.shared.submittedTaskIdentifier == identifier,
+                      !Self.shared.cancellationRequested else {
+                    task.setTaskCompleted(success: false)
+                    return
+                }
                 Self.shared.beginPairing(with: task)
             }
         }
@@ -114,19 +140,29 @@ final class OnDevicePairingCoordinator {
         request.strategy = .fail
 
         Task {
+            guard submittedTaskIdentifier == identifier, phase == .preparing, !cancellationRequested else { return }
             do {
                 try await BGTaskScheduler.shared.submitTaskRequest(request)
+                if submittedTaskIdentifier != identifier || cancellationRequested {
+                    BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: identifier)
+                }
             } catch {
+                // Clean only this submission, including late completion from an old attempt.
+                BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: identifier)
+                guard submittedTaskIdentifier == identifier, phase == .preparing, !cancellationRequested else { return }
+                BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: identifier)
                 submittedTaskIdentifier = nil
                 recordStore = nil
-                phase = .failed(
-                    "iOS could not keep pairing active in the background. Keep Roam Control open and try again."
-                )
+                let reason = SchedulerFailureReason.classify(error)
+                schedulerFailureReason = reason
+                phase = .failed(reason.pairingGuidance)
             }
         }
     }
 
     func cancel() {
+        // The short secure-store operation must finish before another attempt can begin.
+        guard !storageIsRunning else { return }
         guard isRunning else {
             phase = .idle
             return
@@ -141,6 +177,11 @@ final class OnDevicePairingCoordinator {
         }
         if let submittedTaskIdentifier {
             BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: submittedTaskIdentifier)
+        }
+        if !workerIsRunning {
+            submittedTaskIdentifier = nil
+            recordStore = nil
+            phase = .idle
         }
     }
 
@@ -207,9 +248,11 @@ final class OnDevicePairingCoordinator {
 
             let outcome = NativePairingOutcome(result: result, returnCode: returnCode)
             rc_remote_pairing_result_destroy(&result)
-            rc_remote_pairing_session_destroy(session)
 
             DispatchQueue.main.async {
+                if let session = OpaquePointer(bitPattern: sessionBits) {
+                    rc_remote_pairing_session_destroy(session)
+                }
                 let coordinator = Unmanaged<OnDevicePairingCoordinator>
                     .fromOpaque(context)
                     .takeRetainedValue()
@@ -279,17 +322,23 @@ final class OnDevicePairingCoordinator {
 
         switch outcome {
         case .success(let record, let hostAltIRK, let device):
+            storageIsRunning = true
             phase = .storing
             backgroundTask?.progress.completedUnitCount = 80
 
             guard let recordStore else {
+                storageIsRunning = false
                 fail("Roam Control could not securely store the new pairing.")
                 return
             }
 
+            let storageTaskIdentifier = submittedTaskIdentifier
             Task {
+                defer { self.storageIsRunning = false }
                 do {
                     _ = try await recordStore(record, hostAltIRK)
+                    guard self.submittedTaskIdentifier == storageTaskIdentifier,
+                          self.phase == .storing else { return }
                     self.recordStore = nil
                     self.phase = .success(device)
                     self.backgroundTask?.progress.completedUnitCount = 100
@@ -299,7 +348,9 @@ final class OnDevicePairingCoordinator {
                     )
                     self.finishBackgroundTask(success: true)
                 } catch {
-                    self.fail(error.localizedDescription)
+                    guard self.submittedTaskIdentifier == storageTaskIdentifier,
+                          self.phase == .storing else { return }
+                    self.fail("Roam Control could not securely store the new pairing.")
                 }
             }
 

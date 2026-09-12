@@ -50,9 +50,38 @@ final class LocalDeviceSessionCoordinator: NSObject {
     private static let minimumRestorationDisplayDuration: TimeInterval = 1.2
 
     private(set) var phase: DeviceSessionPhase = .idle {
-        didSet { onPhaseChange?(phase) }
+        didSet {
+            guard phase != oldValue else { return }
+            if case .failed(let message) = phase {
+                guard !terminalFailureReported else { return }
+                terminalFailureReported = true
+                let stage = FailureStage.classify(message, fallback: .locationUnknown)
+                lastFailureStage = stage
+                lastFailureDisposition = .terminal
+                onFailure?(stage)
+            }
+            onPhaseChange?(phase)
+        }
     }
-    private(set) var mobileDataGuidance: MobileDataGuidance?
+    private(set) var mobileDataGuidance: MobileDataGuidance? {
+        didSet {
+            if mobileDataGuidance == .connectionHelp, oldValue != .connectionHelp {
+                onConnectionEvent?(.connectionHelpShown)
+            }
+        }
+    }
+    var onConnectionEvent: ((UsageAnalyticsEvent) -> Void)?
+    private var retryTelemetry = ConnectionRetryTelemetry()
+    private var vpnReturnRetryUsed = false
+    private var vpnReturnRetryTask: Task<Void, Never>?
+
+    private(set) var restorationStatus = "Not requested"
+    private(set) var schedulerFailureReason: SchedulerFailureReason?
+    private(set) var lastFailureStage: FailureStage?
+    private(set) var lastFailureDisposition: FailureDisposition?
+    var onRecoveryNeeded: ((FailureStage) -> Void)?
+    private var terminalFailureReported = false
+    var onFailure: ((FailureStage) -> Void)?
 
     var onPhaseChange: ((DeviceSessionPhase) -> Void)?
 
@@ -123,6 +152,13 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
     func start(pairingRecord: Data, target: LocationTarget) {
         guard !workerIsRunning, !isBusy else { return }
+        terminalFailureReported = false
+        retryTelemetry.reset()
+        schedulerFailureReason = nil
+        lastFailureStage = nil
+        lastFailureDisposition = nil
+        restorationStatus = "Not requested"
+        vpnReturnRetryUsed = false
 
 #if targetEnvironment(simulator)
         phase = .failed("A real iPhone is required to start a location session.")
@@ -222,6 +258,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
     func retryConnection() {
         guard mobileDataGuidance == .connectionHelp, pendingSession != nil else { return }
+        onConnectionEvent?(retryTelemetry.selected())
         mobileDataGuidance = nil
         resolvedService = nil
         beginDiscovery(showConnectionHelpIfUnavailable: true)
@@ -280,6 +317,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
             }
         case .active:
             cancellationRequested = true
+            restorationStatus = "Stop requested; awaiting device response"
             restorationDisplayStartDate = .now
             phase = .stopping
             backgroundTask?.updateTitle(
@@ -302,6 +340,39 @@ final class LocalDeviceSessionCoordinator: NSObject {
         if !workerIsRunning {
             clearPendingSession()
             phase = .idle
+        }
+    }
+
+    // A cold VPN start can briefly expose services before the return to the app settles.
+    // Retry once per start; never turn this into an unbounded recovery loop.
+    private func showConnectionHelp() {
+        guard pendingSession != nil, !workerIsRunning else { return }
+        guard hasRequestedLocalDevVPNThisAttempt, !isMobileDataStartupMode,
+              !vpnReturnRetryUsed else {
+            mobileDataGuidance = .connectionHelp
+            return
+        }
+        vpnReturnRetryUsed = true
+        cleanupDiscovery()
+        phase = .discovering
+        mobileDataGuidance = nil
+        vpnReturnRetryTask = Task { @MainActor [weak self] in
+            // Bound the foreground wait as well as the retry count.
+            for _ in 0..<10 {
+                do { try await Task.sleep(for: .milliseconds(300)) }
+                catch { return }
+                guard let self, self.pendingSession != nil,
+                      self.phase == .discovering, !self.workerIsRunning else { return }
+                if UIApplication.shared.applicationState == .active {
+                    self.vpnReturnRetryTask = nil
+                    self.resolvedService = nil
+                    self.beginDiscovery(showConnectionHelpIfUnavailable: true)
+                    return
+                }
+            }
+            guard let self, self.pendingSession != nil, self.phase == .discovering else { return }
+            self.vpnReturnRetryTask = nil
+            self.mobileDataGuidance = .connectionHelp
         }
     }
 
@@ -328,7 +399,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
                     !self.workerIsRunning,
                     self.resolvedService == nil
                 else { return }
-                self.mobileDataGuidance = .connectionHelp
+                self.showConnectionHelp()
             }
         }
 
@@ -352,7 +423,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
         if reportTimeout {
             discoveryTimeout = Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(30))
-                guard let self, self.phase == .discovering else { return }
+                guard !Task.isCancelled, let self, self.phase == .discovering else { return }
                 if self.sawNonMatchingService {
                     self.fail(
                         "Roam Control found an outdated device announcement. Toggle LocalDevVPN off and on, then try again."
@@ -464,6 +535,11 @@ final class LocalDeviceSessionCoordinator: NSObject {
             do {
                 try await BGTaskScheduler.shared.submitTaskRequest(request)
             } catch {
+                guard self.submittedTaskIdentifier == identifier, self.phase == .connecting else { return }
+                self.schedulerFailureReason = SchedulerFailureReason.classify(error)
+                self.lastFailureStage = .schedulerSubmission
+                self.lastFailureDisposition = .recoverable
+                self.onRecoveryNeeded?(.schedulerSubmission)
                 BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: identifier)
                 self.submittedTaskIdentifier = nil
                 self.resolvedService = nil
@@ -471,7 +547,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
                     self.enterMobileDataGuidance()
                 } else if self.hasRequestedLocalDevVPNThisAttempt {
                     self.phase = .discovering
-                    self.mobileDataGuidance = .connectionHelp
+                    self.showConnectionHelp()
                 } else {
                     self.openLocalDevVPNForPendingSession()
                 }
@@ -594,6 +670,9 @@ final class LocalDeviceSessionCoordinator: NSObject {
         mobileDataDiscoveryLoopTask?.cancel()
         mobileDataDiscoveryLoopTask = nil
         phase = .active(target)
+        if let event = retryTelemetry.becameActive() {
+            onConnectionEvent?(event)
+        }
         if mobileDataGuidance == .turnOff {
             mobileDataGuidance = .turnBackOn
         }
@@ -624,6 +703,17 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
         if cancellationRequested {
             cancellationRequested = false
+            if case .failure(let message) = outcome,
+               message != "The location session was stopped." {
+                restorationStatus = "Stop not confirmed; real location unverified"
+                clearPendingSession()
+                phase = .failed(message)
+                finishBackgroundTask(success: false)
+                return
+            }
+            if restorationDisplayStartDate != nil {
+                restorationStatus = "Stop command acknowledged; real location reacquisition unverified"
+            }
             clearPendingSession()
             finishCancelledLocationSession()
             return
@@ -637,13 +727,17 @@ final class LocalDeviceSessionCoordinator: NSObject {
             finishBackgroundTask(success: true)
         case .failure(let message):
             if isRecoverableTunnelConnectionFailure(message) {
+                let stage = FailureStage.classify(message, fallback: .locationUnknown)
+                lastFailureStage = stage
+                lastFailureDisposition = .recoverable
+                onRecoveryNeeded?(stage)
                 resolvedService = nil
                 finishBackgroundTask(success: false)
                 if isMobileDataStartupMode {
                     enterMobileDataGuidance()
                 } else if hasRequestedLocalDevVPNThisAttempt {
                     phase = .discovering
-                    mobileDataGuidance = .connectionHelp
+                    showConnectionHelp()
                 } else {
                     openLocalDevVPNForPendingSession()
                 }
@@ -658,6 +752,10 @@ final class LocalDeviceSessionCoordinator: NSObject {
     }
 
     private func locationTaskExpired() {
+        if case .active = phase {
+            restorationDisplayStartDate = .now
+            restorationStatus = "Stop requested; awaiting device response"
+        }
         cancellationRequested = true
         pendingFailureMessage = nil
         mobileDataGuidance = nil
@@ -670,7 +768,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
             phase = .idle
         }
 
-        finishBackgroundTask(success: true)
+        finishBackgroundTask(success: false)
     }
 
     private func fail(_ message: String) {
@@ -691,6 +789,8 @@ final class LocalDeviceSessionCoordinator: NSObject {
     }
 
     private func cleanupDiscovery() {
+        vpnReturnRetryTask?.cancel()
+        vpnReturnRetryTask = nil
         isDiscoveringServices = false
         cleanupServiceProbe()
         discoveryTimeout?.cancel()
@@ -800,7 +900,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
         guard serviceProbeAttemptCount < 3 else {
             serviceProbeAttemptCount = 0
-            mobileDataGuidance = .connectionHelp
+            showConnectionHelp()
             return
         }
 
@@ -825,6 +925,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
     }
 
     private func clearPendingSession() {
+        retryTelemetry.reset()
         automaticDiscoveryTask?.cancel()
         automaticDiscoveryTask = nil
         networkDecisionTask?.cancel()

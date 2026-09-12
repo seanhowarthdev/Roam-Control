@@ -33,6 +33,12 @@ struct ConnectionHealthView: View {
                 )
             }
 
+            Section("Restoration") {
+                Text(appModel.deviceSession.restorationStatus)
+                Text("An inactive session means Roam Control's worker has ended. Other apps may need time to acquire a fresh real location.")
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Current Location") {
                 LabeledContent("Place", value: activeTarget?.name ?? "None")
                 LabeledContent("Coordinates", value: coordinatesValue)
@@ -91,6 +97,12 @@ struct ConnectionHealthView: View {
                 Text("Support")
             } footer: {
                 Text("Copies a status-only report you can paste into a bug report. It never includes locations, searches, pairing records, PINs, device names or error text.")
+            }
+
+            Section("Other VPNs") {
+                Text("Another VPN may affect local device connections. If it is appropriate for your network, compare a test with that VPN paused. Keep LocalDevVPN enabled when starting a location session.")
+                Text("Roam Control has not detected another VPN. This is a troubleshooting check, not a diagnosis; an iOS scheduler rejection happens before the pairing connection starts.")
+                    .foregroundStyle(.secondary)
             }
 
             Section("Help") {
@@ -303,8 +315,14 @@ struct ConnectionHealthView: View {
         App: \(appVersion) (\(build))
         iOS: \(UIDevice.current.systemVersion)
         Pairing: \(pairingValue)
+        Last pairing failure stage (this launch): \(appModel.onDevicePairing.lastFailureStage?.rawValue ?? "None")
+        Pairing scheduler reason (this launch): \(appModel.onDevicePairing.schedulerFailureReason?.rawValue ?? "None")
         LocalDevVPN: \(localDevVPNValue)
         Session: \(sessionValue)
+        Last session issue stage (this launch): \(appModel.deviceSession.lastFailureStage?.rawValue ?? "None")
+        Last session issue disposition: \(appModel.deviceSession.lastFailureDisposition?.rawValue ?? "None")
+        Session scheduler reason (this launch): \(appModel.deviceSession.schedulerFailureReason?.rawValue ?? "None")
+        Restoration: \(appModel.deviceSession.restorationStatus)
         Last connection check: \(checked)
         Connection check result: \(diagnosticResultStatus)
         Appearance: \(appModel.appearance.title)

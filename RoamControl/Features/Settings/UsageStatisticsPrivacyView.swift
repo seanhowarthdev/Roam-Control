@@ -18,6 +18,8 @@ struct UsageStatisticsPrivacyView: View {
                 privacyRow("App opened or returned to foreground", symbol: "app.badge.checkmark")
                 privacyRow("App version and build", symbol: "number")
                 privacyRow("Introduction completed", symbol: "sparkles")
+                privacyRow("Connection help, retry and retry success counts", symbol: "arrow.clockwise")
+                privacyRow("Fixed failure stage, scheduler reason, operation and recovery category", symbol: "exclamationmark.triangle")
                 privacyRow("Pairing completed", symbol: "iphone.and.arrow.forward")
                 privacyRow("Fixed or walking session started", symbol: "figure.walk")
                 privacyRow("Active location updated", symbol: "location.fill")
@@ -28,6 +30,7 @@ struct UsageStatisticsPrivacyView: View {
                 privacyRow("Searches, favourites, history or routes", symbol: "magnifyingglass")
                 privacyRow("Pairing records or PINs", symbol: "key.slash")
                 privacyRow("Apple ID, device name or personal details", symbol: "person.crop.circle.badge.xmark")
+                privacyRow("Raw error messages or credentials", symbol: "lock.shield")
                 privacyRow("Diagnostic reports", symbol: "doc.text.magnifyingglass")
             }
 

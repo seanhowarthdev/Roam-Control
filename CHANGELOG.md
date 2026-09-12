@@ -4,6 +4,41 @@ All notable public changes to Roam Control are recorded here.
 
 ## [Unreleased]
 
+0.9.2 Beta 3, corresponding to app version 0.9.2 Build 53.
+
+### Fixed
+
+- Build 53: guard submission before scheduling and cancel obsolete completions; keep pairing busy during secure storage and guard its completion; report terminal failure once per attempt, including teardown after cancellation.
+
+- Build 53: retain fixed scheduler rejection reasons in pairing/session telemetry and copied diagnostics; reject late pairing launch callbacks and clean up cancelled pre-worker requests.
+- Build 53: bound the native stop-simulation response wait, propagate clear errors through cancellation, and distinguish stop acknowledgement from unverified real-location reacquisition. Rebuilt both native slices.
+- Build 53: retain local session failure stage/disposition, correct premature real-location-restored wording, and add cautious other-VPN comparison guidance without detection or sensitive network telemetry.
+
+- Separated recoverable scheduler/tunnel interruptions into Connection.RecoveryNeeded, reserving Failure.Observed for terminal operation failures. Added a fixed disposition field so corrected data can be filtered separately from historical observations. Included in Build 52; earlier IPAs are unchanged.
+
+- Added one bounded automatic discovery retry after enabling LocalDevVPN before showing manual connection help; foreground wait and cancellation are bounded. Owner-device automatic recovery verified on Build 53; affected-user verification remains open.
+
+- Prevented cancelled discovery and connection-check timers from failing a replacement attempt.
+- Fixed a pairing-session lifetime race when cancelling near native completion.
+- Ignored obsolete or cancelled background-task submission failures.
+- Suppressed repeated identical failure notifications during worker teardown to avoid duplicate failure counts.
+
+### Improved
+
+- Connection Health now verifies TCP reachability of the matched pairing service, and explains that secure session verification happens during session startup.
+- Added fixed failure-stage and operation categories to optional telemetry, including recoverable native startup failures and background-task submission failures.
+- Added connection-help, manual retry and successful-after-retry events to show recoverable connection friction.
+- Updated the anonymous-statistics disclosure and user guide. No locations, searches, pairing records, credentials, PINs, device names or raw error text are transmitted.
+- Removed macOS metadata files from test IPA packaging after an installation signature-verification failure; metadata was a suspected contributor, not a confirmed root cause.
+
+### Validation and remaining work
+
+- Debug/Release builds, native restoration tests, classification checks and IPA verification passed.
+- Owner-device Build 53 testing passed repeated pairing cancellation and subsequent pairing, Wi-Fi automatic recovery, 5G startup/guidance, and quick stop/restore on both networks. Recoverable scheduler classification matched the active session diagnostics.
+- First pairing attempt timed out; suspected manual-step delay is unconfirmed. Immediate retry succeeded.
+- The Build 52 restoration delay was not reproduced. Affected-user pairing/session reports and other-VPN interference remain open; no universal fix is claimed.
+- Walking-session foreground/background continuity and Stop & Restore also passed owner-device smoke testing on Build 53.
+
 ## [0.9.1] - 2026-09-10
 
 First beta polish release, corresponding to app version 0.9.1 Build 47.

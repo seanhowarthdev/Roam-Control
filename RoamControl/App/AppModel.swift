@@ -68,6 +68,26 @@ final class AppModel {
         )
         self.interruptedSession = Self.recoveryRecord(in: preferences)
 
+        onDevicePairing.onFailure = { [weak self] stage in
+            guard let self else { return }
+            self.usageAnalytics.recordFailure(stage, context: .pairing, schedulerReason: self.onDevicePairing.schedulerFailureReason, enabled: self.sharesAnonymousUsageStatistics)
+        }
+        deviceSession.onFailure = { [weak self] stage in
+            guard let self else { return }
+            let restoring = self.isRestoringInterruptedSession || self.isStoppingLocationSessionForRestoration
+            self.usageAnalytics.recordFailure(stage, context: restoring ? .restoration : .location, enabled: self.sharesAnonymousUsageStatistics)
+        }
+
+        deviceSession.onRecoveryNeeded = { [weak self] stage in
+            guard let self else { return }
+            let restoring = self.isRestoringInterruptedSession || self.isStoppingLocationSessionForRestoration
+            self.usageAnalytics.recordFailure(stage, context: restoring ? .restoration : .location,
+                                              disposition: .recoverable, schedulerReason: stage == .schedulerSubmission ? self.deviceSession.schedulerFailureReason : nil, enabled: self.sharesAnonymousUsageStatistics)
+        }
+        deviceSession.onConnectionEvent = { [weak self] event in
+            guard let self else { return }
+            self.usageAnalytics.record(event, enabled: self.sharesAnonymousUsageStatistics)
+        }
         deviceSession.onPhaseChange = { [weak self] phase in
             self?.applyDeviceSessionPhase(phase)
         }
@@ -240,6 +260,7 @@ final class AppModel {
             pairingStatus = .failed(message: error.localizedDescription)
             connectionState = .failed(message: error.localizedDescription)
             usageAnalytics.record(.pairingFailed, enabled: sharesAnonymousUsageStatistics)
+            usageAnalytics.recordFailure(.pairingRead, context: .pairing, enabled: sharesAnonymousUsageStatistics)
         }
     }
 
@@ -254,6 +275,7 @@ final class AppModel {
             pairingStatus = .failed(message: error.localizedDescription)
             connectionState = .failed(message: error.localizedDescription)
             usageAnalytics.record(.pairingFailed, enabled: sharesAnonymousUsageStatistics)
+            usageAnalytics.recordFailure(.pairingImport, context: .pairing, enabled: sharesAnonymousUsageStatistics)
         }
     }
 
@@ -342,6 +364,7 @@ final class AppModel {
                 pendingSessionAnalyticsEvent = nil
                 pairingStatus = .notPaired
                 connectionState = .notConfigured
+                usageAnalytics.recordFailure(.locationPreparation, context: .location, enabled: sharesAnonymousUsageStatistics)
                 usageAnalytics.record(
                     .locationPreparationFailed,
                     enabled: sharesAnonymousUsageStatistics
@@ -356,6 +379,7 @@ final class AppModel {
             activeSessionRecovery = nil
             pendingSessionAnalyticsEvent = nil
             connectionState = .failed(message: error.localizedDescription)
+            usageAnalytics.recordFailure(.locationPreparation, context: .location, enabled: sharesAnonymousUsageStatistics)
             usageAnalytics.record(
                 .locationPreparationFailed,
                 enabled: sharesAnonymousUsageStatistics
@@ -379,6 +403,7 @@ final class AppModel {
             guard let pairingRecord = try await pairingService.pairingRecordData() else {
                 isRestoringInterruptedSession = false
                 interruptedSessionError = "The saved pairing record is unavailable. Pair this iPhone again."
+                usageAnalytics.recordFailure(.locationPreparation, context: .restoration, enabled: sharesAnonymousUsageStatistics)
                 usageAnalytics.record(.locationRestoreFailed, enabled: sharesAnonymousUsageStatistics)
                 return
             }
@@ -389,6 +414,7 @@ final class AppModel {
         } catch {
             isRestoringInterruptedSession = false
             interruptedSessionError = error.localizedDescription
+            usageAnalytics.recordFailure(.locationPreparation, context: .restoration, enabled: sharesAnonymousUsageStatistics)
             usageAnalytics.record(.locationRestoreFailed, enabled: sharesAnonymousUsageStatistics)
         }
     }
@@ -510,7 +536,9 @@ final class AppModel {
                     analyticsEvent(forLocationStartFailure: message),
                     enabled: sharesAnonymousUsageStatistics
                 )
-                clearActiveSessionRecovery()
+                if deviceSession.lastFailureStage != .locationRestore {
+                    clearActiveSessionRecovery()
+                }
             }
         }
     }

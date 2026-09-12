@@ -7,10 +7,10 @@ struct RestoringRealLocationCard: View {
                 .controlSize(.large)
                 .tint(.blue)
 
-            Text("Real Location Restored")
+            Text("Location Simulation Stopped")
                 .font(.headline)
 
-            Text("Updating the map with this iPhone’s real position…")
+            Text("Waiting for a fresh location from this iPhone. Other apps may also take time to update…")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -20,6 +20,6 @@ struct RestoringRealLocationCard: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 18, y: 8)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Real location restored. Updating the map with this iPhone’s real position.")
+        .accessibilityLabel("Location simulation stopped. Waiting for a fresh location from this iPhone.")
     }
 }

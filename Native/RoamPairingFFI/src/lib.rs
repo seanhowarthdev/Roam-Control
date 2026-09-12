@@ -601,8 +601,17 @@ async fn run_location_session(
         }
     }
 
-    let _ = location.clear().await;
-    Ok(())
+    await_location_clear(location.clear(), SESSION_TIMEOUT).await
+}
+
+async fn await_location_clear<E>(
+    operation: impl std::future::Future<Output = Result<(), E>>,
+    deadline: Duration,
+) -> Result<(), String> {
+    timeout(deadline, operation)
+        .await
+        .map_err(|_| "The iPhone did not confirm stopping location simulation in time.".to_string())?
+        .map_err(|_| "Roam Control could not confirm stopping location simulation.".to_string())
 }
 
 fn current_coordinates(
@@ -728,5 +737,27 @@ unsafe fn destroy_byte_buffer(pointer: *mut u8, length: usize) {
         unsafe { ptr::write_bytes(pointer, 0, length) };
         let slice = ptr::slice_from_raw_parts_mut(pointer, length);
         unsafe { drop(Box::from_raw(slice)) };
+    }
+}
+
+#[cfg(test)]
+mod restoration_tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn clear_success_is_acknowledged() {
+        assert!(await_location_clear(std::future::ready(Ok::<(), ()>(())), Duration::from_millis(10)).await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn clear_error_is_not_success() {
+        assert_eq!(await_location_clear(std::future::ready(Err::<(), ()>(())), Duration::from_millis(10)).await.unwrap_err(),
+            "Roam Control could not confirm stopping location simulation.");
+    }
+
+    #[tokio::test]
+    async fn clear_has_a_deadline() {
+        assert_eq!(await_location_clear(std::future::pending::<Result<(), ()>>(), Duration::from_millis(1)).await.unwrap_err(),
+            "The iPhone did not confirm stopping location simulation in time.");
     }
 }
