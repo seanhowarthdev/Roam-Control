@@ -1,5 +1,15 @@
 # Roam Control releases
 
+## 0.9.2 (Build 53)
+
+- Created: 12 September 2026
+- Package: `RoamControl-0.9.2-Beta3-build53.ipa`
+- Build: optimized unsigned Release, stripped arm64 iPhone executable
+- Requires: iOS 27.0 or later
+- Distribution: unsigned IPA (for SideStore re-signing)
+- SHA-256: `5222a17a68fe88ad059bda8d91569ead39f65bc5f85c5132bddff0dbec3f187b`
+- Change: stability and reliability update focused on pairing cancellation and scheduler handling, bounded LocalDevVPN recovery, clearer session diagnostics, more reliable Stop & Restore acknowledgement and privacy-preserving recovery/failure telemetry.
+
 ## 0.9.1 (Build 47)
 
 - Created: 10 September 2026, 18:06 BST
