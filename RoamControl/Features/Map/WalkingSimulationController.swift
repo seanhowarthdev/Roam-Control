@@ -191,7 +191,12 @@ final class WalkingSimulationController {
             }
 
         case .idle:
-            guard phase == .stopping else { return }
+            // The session coordinator returns to .idle directly from
+            // .openingLocalDevVPN/.discovering without passing through .stopping,
+            // so .preparing has to be accepted here too. Otherwise a walk
+            // cancelled from the connection-guidance screen would stay on its
+            // "Starting walking session…" spinner with no usable control.
+            guard phase == .stopping || phase == .preparing else { return }
             movementTask?.cancel()
             movementTask = nil
             currentCoordinate = nil

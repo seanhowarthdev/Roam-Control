@@ -17,6 +17,7 @@ struct HomeView: View {
     @State private var visibleMapCamera: MapCamera?
     @State private var isPreparingRecoveredWalk = false
     @State private var recoveredWalkError: String?
+    @State private var recoveredWalkPreparationTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
 
     init(
@@ -368,10 +369,16 @@ struct HomeView: View {
                         },
                         onAlreadyRestored: {
                             dismissInterruptedSessionRecovery()
+                            mapModel.showRealLocationAfterSession()
                         },
                         onCancel: {
                             if appModel.isRestoringInterruptedSession {
                                 appModel.cancelInterruptedSessionRestoration()
+                            } else if isPreparingRecoveredWalk {
+                                // "Cancel Restoration" is also shown while a recovered
+                                // walking route is being prepared, so it has to be able
+                                // to abandon that preparation as well.
+                                cancelRecoveredWalkPreparation()
                             }
                         }
                     )
@@ -573,11 +580,16 @@ struct HomeView: View {
         }
 
         isPreparingRecoveredWalk = true
-        Task { @MainActor in
+        recoveredWalkPreparationTask?.cancel()
+        recoveredWalkPreparationTask = Task { @MainActor in
             let route = await walkingRoutePlanner.preview(
                 to: destination,
                 from: recovery.lastReportedLocation
             )
+            recoveredWalkPreparationTask = nil
+            // A cancel during preparation has already restored the recovery
+            // options, so a late result must not resurrect the walk.
+            guard !Task.isCancelled else { return }
             guard let route else {
                 recoveredWalkError = walkingRoutePlanner.errorMessage
                     ?? "The remaining walking route could not be prepared."
@@ -605,7 +617,16 @@ struct HomeView: View {
         walkingSimulation.reset()
         walkingRoutePlanner.clear()
         appModel.dismissInterruptedSessionRecovery()
-        mapModel.showRealLocationAfterSession()
+    }
+
+    // Abandons a recovered-walk route preparation and leaves the recovery sheet
+    // offering its options again, matching how cancelling a restoration behaves.
+    private func cancelRecoveredWalkPreparation() {
+        recoveredWalkPreparationTask?.cancel()
+        recoveredWalkPreparationTask = nil
+        walkingRoutePlanner.clear()
+        recoveredWalkError = nil
+        isPreparingRecoveredWalk = false
     }
 }
 
