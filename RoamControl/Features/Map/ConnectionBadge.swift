@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ConnectionBadge: View {
+    @Environment(\.locale) private var locale
     let state: ConnectionState
 
     var body: some View {
@@ -9,7 +10,7 @@ struct ConnectionBadge: View {
                 .fill(color)
                 .frame(width: 8, height: 8)
 
-            Text(label)
+            Text(AppLocalization.text(label, locale: locale))
                 .font(.caption.weight(.semibold))
 
             Image(systemName: "chevron.right")
@@ -22,7 +23,7 @@ struct ConnectionBadge: View {
         .background(.regularMaterial, in: Capsule())
         .shadow(color: .black.opacity(0.08), radius: 8, y: 3)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Connection status: \(label)")
+        .accessibilityLabel(AppLocalization.text("Connection status: \(AppLocalization.text(label, locale: locale))", locale: locale))
     }
 
     private var label: String {

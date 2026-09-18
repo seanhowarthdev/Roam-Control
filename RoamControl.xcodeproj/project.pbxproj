@@ -8,16 +8,44 @@
 
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* Frameworks/RoamPairingFFI.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* Frameworks/RoamPairingFFI.xcframework */; };
+		B10000000000000000000001 /* RoamTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* RoamTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B10000000000000000000008 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A0000000000000000000000A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B10000000000000000000006;
+			remoteInfo = RoamTunnel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B10000000000000000000007 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B10000000000000000000001 /* RoamTunnel.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A00000000000000000000001 /* RoamControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoamControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000002 /* Frameworks/RoamPairingFFI.xcframework */ = {isa = PBXFileReference; explicitFileType = wrapper.xcframework; path = Frameworks/RoamPairingFFI.xcframework; sourceTree = "<group>"; };
 		A20000000000000000000001 /* Configuration/Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configuration/Local.xcconfig; sourceTree = "<group>"; };
+		B10000000000000000000002 /* RoamTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; path = RoamTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A00000000000000000000002 /* RoamControl */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = RoamControl; sourceTree = "<group>"; };
+		B10000000000000000000003 /* RoamTunnel */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = RoamTunnel; sourceTree = "<group>"; };
+		B10000000000000000000005 /* TunnelShared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TunnelShared; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +57,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1000000000000000000000C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -36,6 +71,8 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000002 /* RoamControl */,
+				B10000000000000000000003 /* RoamTunnel */,
+				B10000000000000000000005 /* TunnelShared */,
 				A20000000000000000000001 /* Configuration/Local.xcconfig */,
 				A10000000000000000000002 /* Frameworks/RoamPairingFFI.xcframework */,
 				A00000000000000000000005 /* Products */,
@@ -46,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000001 /* RoamControl.app */,
+				B10000000000000000000002 /* RoamTunnel.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,18 +98,41 @@
 				A00000000000000000000008 /* Sources */,
 				A00000000000000000000003 /* Frameworks */,
 				A00000000000000000000009 /* Resources */,
+				B10000000000000000000007 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B10000000000000000000009 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A00000000000000000000002 /* RoamControl */,
+				B10000000000000000000005 /* TunnelShared */,
+			);
+			name = RoamControl;
+			productName = RoamControl;
+			productReference = A00000000000000000000001 /* RoamControl.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B10000000000000000000006 /* RoamTunnel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1000000000000000000000A /* Build configuration list for PBXNativeTarget "RoamTunnel" */;
+			buildPhases = (
+				B1000000000000000000000B /* Sources */,
+				B1000000000000000000000C /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				A00000000000000000000002 /* RoamControl */,
+				B10000000000000000000003 /* RoamTunnel */,
+				B10000000000000000000005 /* TunnelShared */,
 			);
-			name = RoamControl;
-			productName = RoamControl;
-			productReference = A00000000000000000000001 /* RoamControl.app */;
-			productType = "com.apple.product-type.application";
+			name = RoamTunnel;
+			productName = RoamTunnel;
+			productReference = B10000000000000000000002 /* RoamTunnel.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -94,6 +155,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"zh-Hans",
 				Base,
 			);
 			mainGroup = A00000000000000000000004;
@@ -102,6 +164,7 @@
 			projectRoot = "";
 			targets = (
 				A00000000000000000000006 /* RoamControl */,
+				B10000000000000000000006 /* RoamTunnel */,
 			);
 		};
 /* End PBXProject section */
@@ -124,7 +187,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1000000000000000000000B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B10000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B10000000000000000000006 /* RoamTunnel */;
+			targetProxy = B10000000000000000000008 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A0000000000000000000000C /* Debug */ = {
@@ -173,6 +251,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Configuration/RoamControl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 61;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
@@ -180,7 +259,7 @@
 				INFOPLIST_FILE = "Configuration/RoamControl-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MARKETING_VERSION = 0.9.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sean.roamcontrol;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ROAMCONTROL_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				ROAMCONTROL_BUILD_TIMESTAMP = "2026-09-14T20:11:19Z";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -198,6 +277,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Configuration/RoamControl.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 61;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
@@ -205,7 +285,7 @@
 				INFOPLIST_FILE = "Configuration/RoamControl-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MARKETING_VERSION = 0.9.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sean.roamcontrol;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ROAMCONTROL_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				ROAMCONTROL_BUILD_TIMESTAMP = "2026-09-14T20:11:19Z";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -214,6 +294,62 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		B1000000000000000000000D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A20000000000000000000001 /* Configuration/Local.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = RoamTunnel/RoamTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 61;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RoamTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.9.2;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ROAMCONTROL_APP_BUNDLE_IDENTIFIER).RoamTunnel";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B1000000000000000000000E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A20000000000000000000001 /* Configuration/Local.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = RoamTunnel/RoamTunnel.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 61;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RoamTunnel/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.9.2;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ROAMCONTROL_APP_BUNDLE_IDENTIFIER).RoamTunnel";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -234,6 +370,15 @@
 			buildConfigurations = (
 				A0000000000000000000000C /* Debug */,
 				A0000000000000000000000D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B1000000000000000000000A /* Build configuration list for PBXNativeTarget "RoamTunnel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B1000000000000000000000D /* Debug */,
+				B1000000000000000000000E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

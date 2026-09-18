@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MobileDataGuidanceView: View {
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let guidance: MobileDataGuidance
@@ -60,10 +61,10 @@ struct MobileDataGuidanceView: View {
             }
 
             VStack(spacing: 10) {
-                Text(title)
+                Text(AppLocalization.text(title, locale: locale))
                     .font(.title2.bold())
 
-                Text(message)
+                Text(AppLocalization.text(message, locale: locale))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -72,7 +73,7 @@ struct MobileDataGuidanceView: View {
 
             if guidance == .connectionHelp {
                 Label(
-                    "Roam Control has not found LocalDevVPN's device connection yet.",
+                    AppLocalization.text("Roam Control has not found this iPhone through the local VPN yet.", locale: locale),
                     systemImage: "lock.shield"
                 )
                 .font(.caption)
@@ -80,23 +81,23 @@ struct MobileDataGuidanceView: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
-                Button("Try Again", action: onRetry)
+                Button(AppLocalization.text("Try Again", locale: locale), action: onRetry)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .frame(maxWidth: .infinity)
 
-                Button("Open LocalDevVPN", action: onOpenLocalDevVPN)
+                Button(AppLocalization.text("Connect Local VPN", locale: locale), action: onOpenLocalDevVPN)
                     .buttonStyle(.bordered)
 
-                Button("I'm Using Mobile Data", action: onUseMobileData)
+                Button(AppLocalization.text("I'm Using Mobile Data", locale: locale), action: onUseMobileData)
                     .buttonStyle(.bordered)
 
-                Button("Cancel", role: .cancel, action: onCancel)
+                Button(AppLocalization.text("Cancel", locale: locale), role: .cancel, action: onCancel)
                     .foregroundStyle(.secondary)
             } else if guidance == .turnOff {
                 HStack(spacing: 9) {
                     ProgressView()
-                    Text("Detecting this iPhone…")
+                    Text(AppLocalization.text("Detecting this iPhone…", locale: locale))
                         .font(.subheadline.weight(.semibold))
                 }
                 .padding(.horizontal, 18)
@@ -104,7 +105,7 @@ struct MobileDataGuidanceView: View {
                 .background(.thinMaterial, in: Capsule())
 
                 Label(
-                    "Roam Control should continue automatically. If it doesn't, tap Continue.",
+                    AppLocalization.text("Roam Control should continue automatically. If it doesn't, tap Continue.", locale: locale),
                     systemImage: "checkmark.seal.fill"
                 )
                 .font(.caption)
@@ -112,22 +113,22 @@ struct MobileDataGuidanceView: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
-                Button("Continue", action: onMobileDataOff)
+                Button(AppLocalization.text("Continue", locale: locale), action: onMobileDataOff)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .frame(maxWidth: .infinity)
 
-                Button("Open LocalDevVPN", action: onOpenLocalDevVPN)
+                Button(AppLocalization.text("Connect Local VPN", locale: locale), action: onOpenLocalDevVPN)
                     .buttonStyle(.bordered)
 
-                Button("Cancel", role: .cancel, action: onCancel)
+                Button(AppLocalization.text("Cancel", locale: locale), role: .cancel, action: onCancel)
                     .foregroundStyle(.secondary)
             } else {
-                Label("Location is active", systemImage: "location.fill")
+                Label(AppLocalization.text("Location is active", locale: locale), systemImage: "location.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.green)
 
-                Button("Done", action: onDone)
+                Button(AppLocalization.text("Done", locale: locale), action: onDone)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .frame(maxWidth: .infinity)
@@ -149,9 +150,9 @@ struct MobileDataGuidanceView: View {
     private var message: String {
         switch guidance {
         case .connectionHelp:
-            "If you're on Wi‑Fi, make sure LocalDevVPN says Connected, then try again. Choose mobile data only when you're actually using 4G or 5G."
+            "If you're on Wi‑Fi, make sure the local VPN is connected, then try again. Choose mobile data only when you're actually using 4G or 5G."
         case .turnOff:
-            "Make sure LocalDevVPN is connected, switch mobile data off briefly, then return to Roam Control."
+            "Keep the local VPN connected, switch mobile data off briefly, then return to Roam Control."
         case .turnBackOn:
             "The secure location session is ready. You can restore mobile data now; spoofing will continue over 5G."
         }

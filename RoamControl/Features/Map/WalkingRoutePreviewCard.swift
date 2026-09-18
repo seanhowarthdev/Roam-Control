@@ -2,6 +2,7 @@ import MapKit
 import SwiftUI
 
 struct WalkingRoutePreviewCard: View {
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let route: MKRoute
@@ -32,14 +33,14 @@ struct WalkingRoutePreviewCard: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 18, y: 8)
         .confirmationDialog(
-            "Stop walking and restore this iPhone's real location?",
+            AppLocalization.text("Stop walking and restore this iPhone's real location?", locale: locale),
             isPresented: $isConfirmingStop,
             titleVisibility: .visible
         ) {
-            Button("Stop & Restore", role: .destructive, action: onStop)
-            Button("Keep Simulated Location", role: .cancel) {}
+            Button(AppLocalization.text("Stop & Restore", locale: locale), role: .destructive, action: onStop)
+            Button(AppLocalization.text("Keep Simulated Location", locale: locale), role: .cancel) {}
         } message: {
-            Text("Roam Control will end the simulated walk and restore your real location. Your route progress will be reset.")
+            Text(AppLocalization.text("Roam Control will end the simulated walk and restore your real location. Your route progress will be reset.", locale: locale))
         }
     }
 
@@ -52,10 +53,10 @@ struct WalkingRoutePreviewCard: View {
                     .frame(width: 32)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(phaseTitle)
+                    Text(AppLocalization.text(phaseTitle, locale: locale))
                         .font(.headline)
 
-                    Text(phaseSubtitle)
+                    Text(AppLocalization.text(phaseSubtitle, locale: locale))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize ? 4 : 2)
@@ -71,7 +72,7 @@ struct WalkingRoutePreviewCard: View {
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Close walking route")
+                    .accessibilityLabel(AppLocalization.text("Close walking route", locale: locale))
                 }
             }
 
@@ -94,16 +95,16 @@ struct WalkingRoutePreviewCard: View {
     @ViewBuilder
     private var pacePicker: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            Picker("Walking pace", selection: paceBinding) {
+            Picker(AppLocalization.text("Walking pace", locale: locale), selection: paceBinding) {
                 ForEach(WalkingPace.allCases) { pace in
-                    Text(pace.title).tag(pace)
+                    Text(AppLocalization.text(pace.title, locale: locale)).tag(pace)
                 }
             }
             .pickerStyle(.menu)
         } else {
-            Picker("Walking pace", selection: paceBinding) {
+            Picker(AppLocalization.text("Walking pace", locale: locale), selection: paceBinding) {
                 ForEach(WalkingPace.allCases) { pace in
-                    Text(pace.title).tag(pace)
+                    Text(AppLocalization.text(pace.title, locale: locale)).tag(pace)
                 }
             }
             .pickerStyle(.segmented)
@@ -148,7 +149,7 @@ struct WalkingRoutePreviewCard: View {
         switch simulation.phase {
         case .idle:
             Button(action: onStart) {
-                Label("Start Walking", systemImage: "figure.walk.motion")
+                Label(AppLocalization.text("Start Walking", locale: locale), systemImage: "figure.walk.motion")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -158,7 +159,7 @@ struct WalkingRoutePreviewCard: View {
         case .preparing:
             HStack(spacing: 10) {
                 ProgressView()
-                Text("Starting walking session…")
+                Text(AppLocalization.text("Starting walking session…", locale: locale))
                     .font(.subheadline.weight(.medium))
             }
             .frame(maxWidth: .infinity)
@@ -180,7 +181,7 @@ struct WalkingRoutePreviewCard: View {
 
         case .arrived:
             Button(action: onWalkBack) {
-                Label("Walk Route Back", systemImage: "arrow.uturn.backward")
+                Label(AppLocalization.text("Walk Route Back", locale: locale), systemImage: "arrow.uturn.backward")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -203,14 +204,14 @@ struct WalkingRoutePreviewCard: View {
         case .stopping:
             HStack(spacing: 10) {
                 ProgressView()
-                Text("Restoring this iPhone's real location…")
+                Text(AppLocalization.text("Restoring this iPhone's real location…", locale: locale))
                     .font(.subheadline.weight(.medium))
             }
             .frame(maxWidth: .infinity)
 
         case .failed:
             Button(action: onStart) {
-                Label("Try Again", systemImage: "arrow.clockwise")
+                Label(AppLocalization.text("Try Again", locale: locale), systemImage: "arrow.clockwise")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -222,7 +223,7 @@ struct WalkingRoutePreviewCard: View {
     private var pauseButton: some View {
                 Button(action: onTogglePause) {
                     Label(
-                        simulation.phase == .paused ? "Resume" : "Pause",
+                        AppLocalization.text(simulation.phase == .paused ? "Resume" : "Pause", locale: locale),
                         systemImage: simulation.phase == .paused ? "play.fill" : "pause.fill"
                     )
                     .frame(maxWidth: .infinity)
@@ -237,7 +238,7 @@ struct WalkingRoutePreviewCard: View {
                     isConfirmingStop = true
                 } label: {
             if showTitle {
-                Label("Stop & Restore", systemImage: "stop.fill")
+                Label(AppLocalization.text("Stop & Restore", locale: locale), systemImage: "stop.fill")
                     .frame(maxWidth: .infinity)
             } else {
                 Image(systemName: "stop.fill")
@@ -246,12 +247,12 @@ struct WalkingRoutePreviewCard: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
-                .accessibilityLabel("Stop walking and restore real location")
+                .accessibilityLabel(AppLocalization.text("Stop walking and restore real location", locale: locale))
     }
 
     private var newLocationButton: some View {
         Button(action: onChooseNewLocation) {
-            Label("New Location", systemImage: "mappin.and.ellipse")
+            Label(AppLocalization.text("New Location", locale: locale), systemImage: "mappin.and.ellipse")
                     .frame(maxWidth: .infinity)
             }
         .buttonStyle(.bordered)
@@ -264,7 +265,7 @@ struct WalkingRoutePreviewCard: View {
                     isConfirmingStop = true
                 } label: {
             if showTitle {
-                Label("Stop & Restore", systemImage: "location.slash.fill")
+                Label(AppLocalization.text("Stop & Restore", locale: locale), systemImage: "location.slash.fill")
                     .frame(maxWidth: .infinity)
             } else {
                 Image(systemName: "location.slash.fill")
@@ -273,58 +274,58 @@ struct WalkingRoutePreviewCard: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
-                .accessibilityLabel("Stop and restore real location")
+                .accessibilityLabel(AppLocalization.text("Stop and restore real location", locale: locale))
     }
 
     @ViewBuilder
     private var footer: some View {
         switch simulation.phase {
         case .idle:
-            Text(isPaired
+            Text(AppLocalization.text(isPaired
                  ? "Your location will move along this route at the selected pace."
-                 : "Pair this iPhone before starting a walking session.")
+                 : "Pair this iPhone before starting a walking session.", locale: locale))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
 
         case .preparing:
-            Text("Follow the mobile-data guidance if it appears.")
+            Text(AppLocalization.text("Follow the mobile-data guidance if it appears.", locale: locale))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
 
         case .walking:
-            Text("Keep Roam Control running. You can use other apps while the walk continues.")
+            Text(AppLocalization.text("Keep Roam Control running. You can use other apps while the walk continues.", locale: locale))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
 
         case .paused:
-            Text("Your spoofed location is being held here until you resume.")
+            Text(AppLocalization.text("Your spoofed location is being held here until you resume.", locale: locale))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
 
         case .arrived:
-            Text("The destination remains active until you stop and restore your real location.")
+            Text(AppLocalization.text("The destination remains active until you stop and restore your real location.", locale: locale))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
 
         case .stopping:
-            Text("Keep Roam Control open until the real location has been restored.")
+            Text(AppLocalization.text("Keep Roam Control open until the real location has been restored.", locale: locale))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
 
         case .failed(let message):
-            Text(message)
+            Text(AppLocalization.text(message, locale: locale))
                 .font(.caption)
                 .foregroundStyle(.red)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -374,11 +375,11 @@ struct WalkingRoutePreviewCard: View {
     private var phaseSubtitle: String {
         switch simulation.phase {
         case .idle, .preparing, .failed:
-            "Current Location to \(destination.name)"
+            "Current Location to \(destination.displayName(locale: locale))"
         case .walking, .paused:
-            "Heading to \(destination.name) · \(Int((simulation.progress * 100).rounded()))%"
+            "Heading to \(destination.displayName(locale: locale)) · \(Int((simulation.progress * 100).rounded()))%"
         case .arrived:
-            "Location active at \(destination.name)"
+            "Location active at \(destination.displayName(locale: locale))"
         case .stopping:
             "Restoring this iPhone's real location"
         }
@@ -416,7 +417,7 @@ struct WalkingRoutePreviewCard: View {
         }
 
         let formatter = MeasurementFormatter()
-        formatter.locale = .current
+        formatter.locale = AppLocalization.measurementLocale(for: locale)
         formatter.unitOptions = .naturalScale
         formatter.unitStyle = .short
         formatter.numberFormatter.maximumFractionDigits = 1
@@ -451,7 +452,7 @@ struct WalkingRoutePreviewCard: View {
             : route.expectedTravelTime
         return Date.now
             .addingTimeInterval(duration)
-            .formatted(date: .omitted, time: .shortened)
+            .formatted(Date.FormatStyle(date: .omitted, time: .shortened).locale(locale))
     }
 
     private func formatDuration(_ duration: TimeInterval) -> String {
@@ -467,18 +468,19 @@ struct WalkingRoutePreviewCard: View {
 }
 
 private struct RouteMetric: View {
+    @Environment(\.locale) private var locale
     let title: String
     let value: String
     let symbol: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Label(title, systemImage: symbol)
+            Label(AppLocalization.text(title, locale: locale), systemImage: symbol)
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
 
-            Text(value)
+            Text(AppLocalization.text(value, locale: locale))
                 .font(.subheadline.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
@@ -487,6 +489,6 @@ private struct RouteMetric: View {
         .padding(10)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title), \(value)")
+        .accessibilityLabel(AppLocalization.text("\(AppLocalization.text(title, locale: locale)), \(AppLocalization.text(value, locale: locale))", locale: locale))
     }
 }

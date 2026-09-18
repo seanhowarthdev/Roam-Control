@@ -1,13 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    private static let bugReportURL = URL(
-        string: "https://github.com/seanhowarthdev/Roam-Control/issues/new?template=bug_report.yml"
-    )!
-    private static let featureRequestURL = URL(
-        string: "https://github.com/seanhowarthdev/Roam-Control/issues/new?template=feature_request.yml"
-    )!
-
+    @Environment(\.locale) private var locale
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -15,14 +9,17 @@ struct SettingsView: View {
     @State private var isReplayingOnboarding = false
     @State private var isConfirmingReset = false
     @State private var resetError: String?
-    @State private var releaseUpdateStatus: ReleaseUpdateStatus = .idle
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Appearance") {
+                Section(AppLocalization.text("Language", locale: locale)) {
+                    LanguagePicker()
+                }
+
+                Section(AppLocalization.text("Appearance", locale: locale)) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Theme")
+                        Text(AppLocalization.text("Theme", locale: locale))
                             .font(.subheadline.weight(.medium))
 
                         themePicker
@@ -30,7 +27,7 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Map Style")
+                        Text(AppLocalization.text("Map Style", locale: locale))
                             .font(.subheadline.weight(.medium))
 
                         mapStylePicker
@@ -38,12 +35,19 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
                 }
 
-                Section("Device") {
+                Section(AppLocalization.text("Device", locale: locale)) {
+                    NavigationLink {
+                        EmbeddedVPNView()
+                            .environment(appModel)
+                    } label: {
+                        Label(AppLocalization.text("Built-in Local VPN", locale: locale), systemImage: "network")
+                    }
+
                     NavigationLink {
                         ConnectionHealthView()
                             .environment(appModel)
                     } label: {
-                        Label("Connection Health", systemImage: "stethoscope")
+                        Label(AppLocalization.text("Connection Health", locale: locale), systemImage: "stethoscope")
                     }
 
                     Button {
@@ -58,84 +62,38 @@ struct SettingsView: View {
                     .foregroundStyle(.primary)
                 }
 
-                Section {
-                    Toggle(
-                        "Share Anonymous Usage Statistics",
-                        isOn: anonymousUsageStatisticsBinding
-                    )
-
-                    NavigationLink {
-                        UsageStatisticsPrivacyView()
-                    } label: {
-                        Label("What Is Shared", systemImage: "hand.raised.fill")
-                    }
-                } header: {
-                    Text("Privacy")
-                } footer: {
-                    Text("Optional and off by default. Helps estimate activity from participating installations. Locations, searches and pairing data are never included.")
-                }
-
-                Section("About") {
+                Section(AppLocalization.text("About", locale: locale)) {
                     NavigationLink {
                         AboutRoamControlView()
                     } label: {
-                        Label("About Roam Control", systemImage: "info.circle")
+                        Label(AppLocalization.text("About Roam Control", locale: locale), systemImage: "info.circle")
                     }
 
-                    LabeledContent("Version", value: versionText)
-                    LabeledContent("Build", value: buildNumberText)
-                    LabeledContent("Built", value: buildDateText)
+                    LabeledContent(AppLocalization.text("Version", locale: locale), value: AppLocalization.text(versionText, locale: locale))
+                    LabeledContent(AppLocalization.text("Build", locale: locale), value: AppLocalization.text(buildNumberText, locale: locale))
+                    LabeledContent(AppLocalization.text("Built", locale: locale), value: AppLocalization.text(buildDateText, locale: locale))
 
                     Button {
                         isReplayingOnboarding = true
                     } label: {
-                        Label("Replay Introduction", systemImage: "sparkles")
+                        Label(AppLocalization.text("Replay Introduction", locale: locale), systemImage: "sparkles")
                     }
                     .foregroundStyle(.primary)
                 }
 
                 Section {
-                    Button {
-                        Task { await checkForUpdates() }
-                    } label: {
-                        Label(updateCheckTitle, systemImage: updateCheckSymbol)
-                    }
-                    .disabled(releaseUpdateStatus == .checking)
-
-                    updateStatusDetail
-                } header: {
-                    Text("Updates")
-                } footer: {
-                    Text("Checks the public GitHub release only when you tap it. Roam Control never sends location, pairing or diagnostic data with this request.")
-                }
-
-                Section {
-                    Link(destination: Self.bugReportURL) {
-                        Label("Report a Bug", systemImage: "ladybug")
-                    }
-
-                    Link(destination: Self.featureRequestURL) {
-                        Label("Request a Feature", systemImage: "lightbulb")
-                    }
-                } header: {
-                    Text("Feedback")
-                } footer: {
-                    Text("GitHub may ask you to choose Bug Report or Feature Request first. For pairing or connection problems, open Connection Health and use Copy Diagnostics. Do not include pairing records, credentials or private locations.")
-                }
-
-                Section {
-                    Button("Reset Roam Control", role: .destructive) {
+                    Button(AppLocalization.text("Reset Roam Control", locale: locale), role: .destructive) {
                         isConfirmingReset = true
                     }
                 } footer: {
-                    Text("This clears the pairing record and local app settings, then shows onboarding again. It does not remove or change LocalDevVPN.")
+                    Text(AppLocalization.text("This clears the pairing record and local app settings, then shows onboarding again. It does not remove or change the built-in VPN configuration.", locale: locale))
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(AppLocalization.text("Settings", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(AppLocalization.text("Done", locale: locale)) { dismiss() }
                 }
             }
         }
@@ -149,22 +107,22 @@ struct SettingsView: View {
                 .environment(appModel)
         }
         .confirmationDialog(
-            "Reset Roam Control?",
+            AppLocalization.text("Reset Roam Control?", locale: locale),
             isPresented: $isConfirmingReset,
             titleVisibility: .visible
         ) {
-            Button("Reset App", role: .destructive) {
+            Button(AppLocalization.text("Reset App", locale: locale), role: .destructive) {
                 Task { await resetApp() }
             }
         } message: {
-            Text("Your pairing record and local choices will be removed. You will return to the welcome screen.")
+            Text(AppLocalization.text("Your pairing record and local choices will be removed. You will return to the welcome screen.", locale: locale))
         }
-        .alert("Reset could not finish", isPresented: isShowingResetError) {
-            Button("OK", role: .cancel) {
+        .alert(AppLocalization.text("Reset could not finish", locale: locale), isPresented: isShowingResetError) {
+            Button(AppLocalization.text("OK", locale: locale), role: .cancel) {
                 resetError = nil
             }
         } message: {
-            Text(resetError ?? "Please try again.")
+            Text(AppLocalization.text(resetError ?? "Please try again.", locale: locale))
         }
     }
 
@@ -196,17 +154,17 @@ struct SettingsView: View {
     @ViewBuilder
     private var themePicker: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            Picker("Theme", selection: appearanceBinding) {
+            Picker(AppLocalization.text("Theme", locale: locale), selection: appearanceBinding) {
                 ForEach(AppAppearance.allCases) { appearance in
-                    Label(appearance.title, systemImage: appearance.systemImage)
+                    Label(AppLocalization.text(appearance.title, locale: locale), systemImage: appearance.systemImage)
                         .tag(appearance)
                 }
             }
             .pickerStyle(.menu)
         } else {
-            Picker("Theme", selection: appearanceBinding) {
+            Picker(AppLocalization.text("Theme", locale: locale), selection: appearanceBinding) {
                 ForEach(AppAppearance.allCases) { appearance in
-                    Label(appearance.title, systemImage: appearance.systemImage)
+                    Label(AppLocalization.text(appearance.title, locale: locale), systemImage: appearance.systemImage)
                         .tag(appearance)
                 }
             }
@@ -218,16 +176,16 @@ struct SettingsView: View {
     @ViewBuilder
     private var mapStylePicker: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            Picker("Map Style", selection: mapStyleBinding) {
+            Picker(AppLocalization.text("Map Style", locale: locale), selection: mapStyleBinding) {
                 ForEach(MapDisplayStyle.allCases) { style in
-                    Text(style.title).tag(style)
+                    Text(AppLocalization.text(style.title, locale: locale)).tag(style)
                 }
             }
             .pickerStyle(.menu)
         } else {
-            Picker("Map Style", selection: mapStyleBinding) {
+            Picker(AppLocalization.text("Map Style", locale: locale), selection: mapStyleBinding) {
                 ForEach(MapDisplayStyle.allCases) { style in
-                    Text(style.title).tag(style)
+                    Text(AppLocalization.text(style.title, locale: locale)).tag(style)
                 }
             }
             .pickerStyle(.segmented)
@@ -239,17 +197,17 @@ struct SettingsView: View {
     private var pairingConnectionLabel: some View {
         if dynamicTypeSize.isAccessibilitySize {
             VStack(alignment: .leading, spacing: 3) {
-                Text("Pairing & Connection")
-                Text(connectionLabel)
+                Text(AppLocalization.text("Pairing & Connection", locale: locale))
+                Text(AppLocalization.text(connectionLabel, locale: locale))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         } else {
             HStack {
-                Text("Pairing & Connection")
+                Text(AppLocalization.text("Pairing & Connection", locale: locale))
                 Spacer()
-                Text(connectionLabel)
+                Text(AppLocalization.text(connectionLabel, locale: locale))
                     .foregroundStyle(.secondary)
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.semibold))
@@ -262,13 +220,6 @@ struct SettingsView: View {
         Binding(
             get: { appModel.mapDisplayStyle },
             set: appModel.setMapDisplayStyle
-        )
-    }
-
-    private var anonymousUsageStatisticsBinding: Binding<Bool> {
-        Binding(
-            get: { appModel.sharesAnonymousUsageStatistics },
-            set: appModel.setSharesAnonymousUsageStatistics
         )
     }
 
@@ -289,7 +240,7 @@ struct SettingsView: View {
             ) as? String,
             let buildDate = ISO8601DateFormatter().date(from: timestamp)
         {
-            return buildDate.formatted(date: .abbreviated, time: .shortened)
+            return buildDate.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale))
         }
 
         guard
@@ -298,72 +249,7 @@ struct SettingsView: View {
             let buildDate = values.contentModificationDate
         else { return "Unknown" }
 
-        return buildDate.formatted(date: .abbreviated, time: .shortened)
-    }
-
-    private var updateCheckTitle: String {
-        switch releaseUpdateStatus {
-        case .checking: "Checking for Updates…"
-        default: "Check for Updates"
-        }
-    }
-
-    private var updateCheckSymbol: String {
-        releaseUpdateStatus == .checking ? "arrow.triangle.2.circlepath" : "arrow.down.circle"
-    }
-
-    @ViewBuilder
-    private var updateStatusDetail: some View {
-        switch releaseUpdateStatus {
-        case .idle, .checking:
-            EmptyView()
-        case .updateAvailable(let release):
-            Link(destination: release.releaseURL) {
-                Label("Install \(release.version)", systemImage: "arrow.up.right.square")
-            }
-            Text("A newer public release is available: \(release.name).")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        case .current(let release):
-            Label("You have the latest public release (\(release.version)).", systemImage: "checkmark.circle")
-                .font(.subheadline)
-                .foregroundStyle(.green)
-        case .newerLocalBuild(let release):
-            Link(destination: release.releaseURL) {
-                Label("View public release \(release.version)", systemImage: "arrow.up.right.square")
-            }
-            Text("You are using a newer local test build (\(versionText) Build \(buildNumberText)).")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        case .noPublishedRelease:
-            Label("No public GitHub release has been published yet.", systemImage: "clock")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        case .unavailable:
-            Label("Couldn’t check GitHub right now. Try again later.", systemImage: "exclamationmark.triangle")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    @MainActor
-    private func checkForUpdates() async {
-        releaseUpdateStatus = .checking
-
-        do {
-            let release = try await ReleaseUpdateChecker().latestRelease()
-            if VersionComparison.isRemoteVersionNewer(release.version, than: versionText) {
-                releaseUpdateStatus = .updateAvailable(release)
-            } else if VersionComparison.isRemoteVersionNewer(versionText, than: release.version) {
-                releaseUpdateStatus = .newerLocalBuild(release)
-            } else {
-                releaseUpdateStatus = .current(release)
-            }
-        } catch ReleaseUpdateCheckError.noPublishedRelease {
-            releaseUpdateStatus = .noPublishedRelease
-        } catch {
-            releaseUpdateStatus = .unavailable
-        }
+        return buildDate.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale))
     }
 
     private var isShowingResetError: Binding<Bool> {

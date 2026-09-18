@@ -41,7 +41,6 @@ final class AppModel {
     let onDevicePairing: OnDevicePairingCoordinator
     let deviceSession: LocalDeviceSessionCoordinator
     private let usageAnalytics: UsageAnalyticsService
-    let localDevVPNInstallURL = URL(string: "https://apps.apple.com/app/localdevvpn/id6755608044")!
 
     init(
         pairingService: any PairingService = SecurePairingService(),
@@ -63,9 +62,7 @@ final class AppModel {
         self.mapDisplayStyle = MapDisplayStyle(
             rawValue: preferences.string(forKey: Self.mapDisplayStyleKey) ?? ""
         ) ?? .standard
-        self.sharesAnonymousUsageStatistics = Self.initialUsageStatisticsPreference(
-            in: preferences
-        )
+        self.sharesAnonymousUsageStatistics = false
         self.interruptedSession = Self.recoveryRecord(in: preferences)
 
         onDevicePairing.onFailure = { [weak self] diagnostic in
@@ -202,17 +199,6 @@ final class AppModel {
     func setMapDisplayStyle(_ style: MapDisplayStyle) {
         mapDisplayStyle = style
         preferences.set(style.rawValue, forKey: Self.mapDisplayStyleKey)
-    }
-
-    func setSharesAnonymousUsageStatistics(_ enabled: Bool) {
-        sharesAnonymousUsageStatistics = enabled
-        preferences.set(enabled, forKey: Self.anonymousUsageStatisticsKey)
-
-        if enabled, hasCompletedOnboarding {
-            usageAnalytics.recordActivation(enabled: true)
-        } else if !enabled {
-            usageAnalytics.revokeLocalIdentity()
-        }
     }
 
     func completeOnboarding() {
@@ -628,17 +614,7 @@ final class AppModel {
         return recovery
     }
 
-    private static func initialUsageStatisticsPreference(
-        in preferences: UserDefaults
-    ) -> Bool {
-        if preferences.object(forKey: Self.anonymousUsageStatisticsKey) != nil {
-            return preferences.bool(forKey: Self.anonymousUsageStatisticsKey)
-        }
 
-        // A missing preference is never treated as consent. Existing saved
-        // choices continue unchanged when the app is upgraded.
-        return false
-    }
 }
 
 enum PairingStatus: Equatable {

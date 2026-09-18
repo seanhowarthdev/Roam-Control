@@ -2,13 +2,13 @@ import SwiftUI
 import UIKit
 
 struct LocationSelectionCard: View {
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let location: LocationTarget?
     let isFavourite: Bool
     let isPaired: Bool
     let sessionPhase: DeviceSessionPhase
-    let localDevVPNInstallURL: URL
     let isPreviewingWalkingRoute: Bool
     let walkingRouteError: String?
     let onToggleFavourite: () -> Void
@@ -35,14 +35,14 @@ struct LocationSelectionCard: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 18, y: 8)
         .confirmationDialog(
-            "Stop the simulated location and restore your real location?",
+            AppLocalization.text("Stop the simulated location and restore your real location?", locale: locale),
             isPresented: $isConfirmingStop,
             titleVisibility: .visible
         ) {
-            Button("Stop & Restore", role: .destructive, action: onStop)
-            Button("Keep Simulated Location", role: .cancel) {}
+            Button(AppLocalization.text("Stop & Restore", locale: locale), role: .destructive, action: onStop)
+            Button(AppLocalization.text("Keep Simulated Location", locale: locale), role: .cancel) {}
         } message: {
-            Text("Roam Control will end the simulated location and restore this iPhone's real location.")
+            Text(AppLocalization.text("Roam Control will end the simulated location and restore this iPhone's real location.", locale: locale))
         }
     }
 
@@ -60,7 +60,7 @@ struct LocationSelectionCard: View {
                         } else {
                             Image(systemName: primarySymbol)
                         }
-                        Text(primaryTitle)
+                        Text(AppLocalization.text(primaryTitle, locale: locale))
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -78,7 +78,7 @@ struct LocationSelectionCard: View {
                             } else {
                                 Image(systemName: "figure.walk")
                             }
-                            Text(isPreviewingWalkingRoute ? "Planning Walking Route…" : "Preview Walking Route")
+                            Text(AppLocalization.text(isPreviewingWalkingRoute ? "Planning Walking Route…" : "Preview Walking Route", locale: locale))
                         }
                         .frame(maxWidth: .infinity)
                     }
@@ -88,7 +88,7 @@ struct LocationSelectionCard: View {
                 }
 
                 if let walkingRouteError {
-                    Text(walkingRouteError)
+                    Text(AppLocalization.text(walkingRouteError, locale: locale))
                         .font(.caption)
                         .foregroundStyle(.red)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -96,7 +96,7 @@ struct LocationSelectionCard: View {
                 }
 
                 if isActive && !isShowingActiveTarget {
-                    Button("Stop & Restore", role: .destructive) {
+                    Button(AppLocalization.text("Stop & Restore", locale: locale), role: .destructive) {
                         isConfirmingStop = true
                     }
                         .buttonStyle(.bordered)
@@ -104,19 +104,12 @@ struct LocationSelectionCard: View {
                         .frame(maxWidth: .infinity)
                 }
 
-                Text(statusMessage)
+                Text(AppLocalization.text(statusMessage, locale: locale))
                     .font(.caption)
                     .foregroundStyle(isFailure ? .red : .secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if shouldOfferLocalDevVPN {
-                    Link(destination: localDevVPNInstallURL) {
-                        Label("Get LocalDevVPN", systemImage: "arrow.up.right.square")
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    .frame(maxWidth: .infinity)
-                }
             } else {
                 HStack(spacing: 14) {
                     Image(systemName: "hand.tap")
@@ -124,9 +117,9 @@ struct LocationSelectionCard: View {
                         .foregroundStyle(.blue)
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Choose a location")
+                        Text(AppLocalization.text("Choose a location", locale: locale))
                             .font(.headline)
-                        Text("Search above or tap anywhere on the map.")
+                        Text(AppLocalization.text("Search above or tap anywhere on the map.", locale: locale))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -164,7 +157,7 @@ struct LocationSelectionCard: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(location.name)
+                Text(location.displayName(locale: locale))
                     .font(.headline)
                     .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
 
@@ -183,7 +176,7 @@ struct LocationSelectionCard: View {
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(didCopyCoordinates ? "Location copied" : "Copy location")
+                    .accessibilityLabel(AppLocalization.text(didCopyCoordinates ? "Location copied" : "Copy location", locale: locale))
                 }
             }
         }
@@ -198,7 +191,7 @@ struct LocationSelectionCard: View {
                 .frame(width: 44, height: 44)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(isFavourite ? "Remove from favourites" : "Add to favourites")
+        .accessibilityLabel(AppLocalization.text(isFavourite ? "Remove from favourites" : "Add to favourites", locale: locale))
 
         if canClearSelection {
             Button(action: onClearSelection) {
@@ -208,13 +201,13 @@ struct LocationSelectionCard: View {
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Clear selected location")
+            .accessibilityLabel(AppLocalization.text("Clear selected location", locale: locale))
         }
     }
 
     private func locationDescription(for location: LocationTarget) -> String {
-        let name = location.name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let subtitle = location.subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = location.displayName(locale: locale).trimmingCharacters(in: .whitespacesAndNewlines)
+        let subtitle = location.displaySubtitle(locale: locale).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !subtitle.isEmpty else { return name }
 
         if subtitle.lowercased().hasPrefix(name.lowercased()) {
@@ -274,15 +267,10 @@ struct LocationSelectionCard: View {
         return false
     }
 
-    private var shouldOfferLocalDevVPN: Bool {
-        guard case .failed(let message) = sessionPhase else { return false }
-        return message.localizedCaseInsensitiveContains("Install LocalDevVPN")
-    }
-
     private var primaryTitle: String {
         switch sessionPhase {
         case .openingLocalDevVPN:
-            "Opening LocalDevVPN…"
+            "Connecting Built-in VPN…"
         case .discovering:
             "Finding This iPhone…"
         case .connecting:
@@ -336,16 +324,16 @@ struct LocationSelectionCard: View {
                 ? "Start when ready. Stop restores this iPhone's real location."
                 : "Pair this iPhone before starting location control."
         case .openingLocalDevVPN:
-            return "Roam Control will return automatically after the tunnel starts."
+            return "Connecting the built-in local tunnel. Allow the VPN configuration when prompted."
         case .discovering:
             return "Finding the paired iPhone through the private local tunnel."
         case .connecting:
             return "Opening the secure location session."
         case .active(let target):
             if !isShowingActiveTarget, let location {
-                return "Currently using \(target.name). Update to move to \(location.name)."
+                return "Currently using \(target.displayName(locale: locale)). Update to move to \(location.displayName(locale: locale))."
             }
-            return "This iPhone is using \(target.name). Stop & Restore ends the simulation and restores its real location."
+            return "This iPhone is using \(target.displayName(locale: locale)). Stop & Restore ends the simulation and restores its real location."
         case .stopping:
             return "Restoring this iPhone's real location. Keep Roam Control open until this finishes."
         case .failed(let message):

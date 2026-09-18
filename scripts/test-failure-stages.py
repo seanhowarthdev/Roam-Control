@@ -4,7 +4,7 @@ from pathlib import Path
 import json, re, subprocess, tempfile
 root = Path(__file__).resolve().parents[1]
 swift = (root / 'RoamControl/Services/UsageAnalyticsService.swift').read_text()
-enums = 'import Foundation\n' + swift[swift.index('enum UsageAnalyticsEvent:'):swift.index('/// Sends')] + swift[swift.index('enum FailureContext:'):]
+enums = 'import Foundation\n' + swift[swift.index('enum UsageAnalyticsEvent:'):swift.index('/// Compatibility')] + swift[swift.index('enum FailureContext:'):]
 native = (root / 'Native/RoamPairingFFI/src/lib.rs').read_text()
 location = native[native.index('async fn run_location_session('):native.index('fn current_coordinates(')]
 messages = re.findall(r'"([^"\n]+)"\.to_string\(\)', location)

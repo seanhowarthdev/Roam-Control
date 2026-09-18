@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @Environment(\.locale) private var locale
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -28,7 +29,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 0) {
                 ZStack {
-                    Text("ROAM CONTROL")
+                    Text(AppLocalization.text("ROAM CONTROL", locale: locale))
                         .font(.caption.weight(.bold))
                         .tracking(2.2)
                         .foregroundStyle(.secondary)
@@ -45,7 +46,7 @@ struct OnboardingView: View {
                                     .frame(width: 44, height: 44)
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Close introduction")
+                            .accessibilityLabel(AppLocalization.text("Close introduction", locale: locale))
                         }
                     }
                 }
@@ -73,13 +74,13 @@ struct OnboardingView: View {
                         }
                     }
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Page \(selectedPage + 1) of \(pages.count)")
+                    .accessibilityLabel(AppLocalization.text("Page \(selectedPage + 1) of \(pages.count)", locale: locale))
 
                     Button {
                         advance()
                     } label: {
                         HStack {
-                            Text(finalButtonTitle)
+                            Text(AppLocalization.text(finalButtonTitle, locale: locale))
                             Image(systemName: finalButtonSymbol)
                         }
                         .font(.headline)
@@ -128,6 +129,7 @@ struct OnboardingView: View {
 }
 
 private struct OnboardingPageView: View {
+    @Environment(\.locale) private var locale
     @Environment(AppModel.self) private var appModel
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let page: OnboardingPage
@@ -138,7 +140,20 @@ private struct OnboardingPageView: View {
                 VStack(spacing: 30) {
                     Spacer(minLength: 20)
 
-                    Image(systemName: page.symbol)
+                    Group {
+                        if page.symbol == "location.viewfinder" {
+                            Image("CatGoLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(
+                                    width: dynamicTypeSize.isAccessibilitySize ? 84 : 116,
+                                    height: dynamicTypeSize.isAccessibilitySize ? 84 : 116
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        } else {
+                            Image(systemName: page.symbol)
+                        }
+                    }
                         .font(.system(
                             size: dynamicTypeSize.isAccessibilitySize ? 46 : 64,
                             weight: .semibold
@@ -163,12 +178,12 @@ private struct OnboardingPageView: View {
                         .accessibilityHidden(true)
 
                     VStack(spacing: 14) {
-                        Text(page.title)
+                        Text(AppLocalization.text(page.title, locale: locale))
                             .font(.largeTitle.bold())
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        Text(page.message)
+                        Text(AppLocalization.text(page.message, locale: locale))
                             .font(.title3)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -176,11 +191,6 @@ private struct OnboardingPageView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(.horizontal, 28)
-
-                    if page.showsUsageStatisticsControl {
-                        usageStatisticsCard
-                            .padding(.horizontal, 24)
-                    }
 
                     Spacer(minLength: 20)
                 }
@@ -190,31 +200,6 @@ private struct OnboardingPageView: View {
         }
     }
 
-    private var usageStatisticsCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Toggle(
-                "Share Anonymous Usage Statistics",
-                isOn: Binding(
-                    get: { appModel.sharesAnonymousUsageStatistics },
-                    set: appModel.setSharesAnonymousUsageStatistics
-                )
-            )
-            .font(.headline)
-
-            Label {
-                Text("Off by default. Never includes locations, searches, routes, pairing data or personal information.")
-            } icon: {
-                Image(systemName: "hand.raised.fill")
-                    .foregroundStyle(.green)
-            }
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(18)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .accessibilityElement(children: .contain)
-    }
 }
 
 private struct OnboardingPage {
@@ -222,20 +207,17 @@ private struct OnboardingPage {
     let title: String
     let message: String
     let colors: [Color]
-    let showsUsageStatisticsControl: Bool
 
     init(
         symbol: String,
         title: String,
         message: String,
-        colors: [Color],
-        showsUsageStatisticsControl: Bool = false
+        colors: [Color]
     ) {
         self.symbol = symbol
         self.title = title
         self.message = message
         self.colors = colors
-        self.showsUsageStatisticsControl = showsUsageStatisticsControl
     }
 
     static let pages: [OnboardingPage] = [
@@ -260,9 +242,8 @@ private struct OnboardingPage {
         OnboardingPage(
             symbol: "hand.raised.fill",
             title: "Private by design",
-            message: "Choose whether to help improve Roam Control with anonymous activity counts. Sharing starts only if you switch it on and can be changed later in Settings.",
-            colors: [.indigo, .purple],
-            showsUsageStatisticsControl: true
+            message: "The pairing record is generated or checked on this iPhone, then stored only in its Keychain. Roam Control does not upload it.",
+            colors: [.indigo, .purple]
         )
     ]
 }

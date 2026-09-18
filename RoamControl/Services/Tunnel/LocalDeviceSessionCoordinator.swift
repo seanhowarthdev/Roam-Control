@@ -42,7 +42,6 @@ final class LocalDeviceSessionCoordinator: NSObject {
     }
 
     private static let localDevVPNPeerAddress = "10.7.0.1"
-    private static let enableURL = URL(string: "localdevvpn://enable?scheme=roamcontrol")!
     private static let minimumRestorationDisplayDuration: TimeInterval = 1.2
 
     private(set) var phase: DeviceSessionPhase = .idle {
@@ -119,6 +118,8 @@ final class LocalDeviceSessionCoordinator: NSObject {
     private var discoveryTimeout: Task<Void, Never>?
     private var automaticDiscoveryTask: Task<Void, Never>?
     private var networkDecisionTask: Task<Void, Never>?
+    private var embeddedVPNStartupTask: Task<Void, Never>?
+    private var sessionAttemptIdentifier = UUID()
     private var mobileDataDiscoveryLoopTask: Task<Void, Never>?
     private var mobileDataGuidanceDelay: Task<Void, Never>?
     private var localDevVPNProbeTask: Task<Void, Never>?
@@ -173,6 +174,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
     func start(pairingRecord: Data, target: LocationTarget) {
         guard !workerIsRunning, !isBusy else { return }
+        sessionAttemptIdentifier = UUID()
         terminalFailureReported = false
         retryTelemetry.reset()
         schedulerFailureReason = nil
@@ -201,7 +203,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
     func handleOpenURL(_ url: URL) {
         guard url.scheme?.lowercased() == "roamcontrol" else { return }
-        guard pendingSession != nil else { return }
+        guard pendingSession != nil, embeddedVPNStartupTask == nil else { return }
         guard phase == .openingLocalDevVPN || phase == .discovering else { return }
 
         localDevVPNReturnTimeout?.cancel()
@@ -223,7 +225,8 @@ final class LocalDeviceSessionCoordinator: NSObject {
             let pendingSession
         else { return .unavailable }
 
-        guard rc_location_session_update(activeSession, target.latitude, target.longitude) == 0 else {
+        let wgs84 = WGS84CoordinateConverter.fromMap(latitude: target.latitude, longitude: target.longitude)
+        guard rc_location_session_update(activeSession, wgs84.latitude, wgs84.longitude) == 0 else {
             fail("Roam Control could not update the active location.")
             return .failed
         }
@@ -243,10 +246,12 @@ final class LocalDeviceSessionCoordinator: NSObject {
             return
         }
 
-        UIApplication.shared.open(Self.enableURL) { [weak self] opened in
-            guard !opened else { return }
-            Task { @MainActor in
-                self?.fail("Install LocalDevVPN before starting a location session.")
+        guard !workerIsRunning else { return }
+        Task { @MainActor [weak self] in
+            let vpn = EmbeddedVPNService.shared
+            await vpn.connect()
+            if let error = vpn.errorMessage {
+                self?.fail(error)
             }
         }
 #endif
@@ -286,6 +291,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
     func appDidBecomeActive() {
         if
             phase == .openingLocalDevVPN,
+            embeddedVPNStartupTask == nil,
             pendingSession != nil,
             !workerIsRunning
         {
@@ -567,6 +573,7 @@ final class LocalDeviceSessionCoordinator: NSObject {
         let contextBits = UInt(bitPattern: Unmanaged.passRetained(self).toOpaque())
         let pairingRecord = pendingSession.pairingRecord
         let target = pendingSession.target
+        let wgs84 = WGS84CoordinateConverter.fromMap(latitude: target.latitude, longitude: target.longitude)
         let peerAddressString = Self.localDevVPNPeerAddress
 
         DispatchQueue.global(qos: .userInitiated).async {
@@ -592,8 +599,8 @@ final class LocalDeviceSessionCoordinator: NSObject {
                                 resolvedService.port,
                                 serviceIdentifier,
                                 authTag,
-                                target.latitude,
-                                target.longitude,
+                                wgs84.latitude,
+                                wgs84.longitude,
                                 locationStartedCallback,
                                 context,
                                 &result
@@ -851,6 +858,9 @@ final class LocalDeviceSessionCoordinator: NSObject {
     }
 
     private func clearPendingSession() {
+        sessionAttemptIdentifier = UUID()
+        embeddedVPNStartupTask?.cancel()
+        embeddedVPNStartupTask = nil
         backgroundKeepAlive.stop()
         retryTelemetry.reset()
         automaticDiscoveryTask?.cancel()
@@ -961,19 +971,61 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
     private func openLocalDevVPNForPendingSession() {
 #if !targetEnvironment(simulator)
-        guard pendingSession != nil, !workerIsRunning else { return }
+        guard pendingSession != nil, !workerIsRunning, embeddedVPNStartupTask == nil else { return }
         cleanupDiscovery()
         mobileDataGuidance = nil
         hasRequestedLocalDevVPNThisAttempt = true
         phase = .openingLocalDevVPN
+        let attempt = sessionAttemptIdentifier
+        embeddedVPNStartupTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                if self.sessionAttemptIdentifier == attempt {
+                    self.embeddedVPNStartupTask = nil
+                }
+            }
+            do {
+                let vpn = EmbeddedVPNService.shared
+                // A connection started from Settings may still be awaiting authorization.
+                for _ in 0..<150 {
+                    if !vpn.isTransitioning { break }
+                    try await Task.sleep(for: .milliseconds(200))
+                }
+                try Task.checkCancellation()
+                await vpn.refresh()
+                guard self.sessionAttemptIdentifier == attempt,
+                      self.pendingSession != nil, !self.workerIsRunning,
+                      !Task.isCancelled else { return }
 
-        UIApplication.shared.open(Self.enableURL) { [weak self] opened in
-            guard !opened else { return }
-            Task { @MainActor in
-                self?.fail("Install LocalDevVPN before starting a location session.")
+                try await self.connectEmbeddedVPNForPendingSession(vpn, attempt: attempt)
+            } catch {
+                guard !Task.isCancelled, self.sessionAttemptIdentifier == attempt,
+                      self.pendingSession != nil, !self.workerIsRunning else { return }
+                self.fail(error.localizedDescription)
             }
         }
 #endif
+    }
+
+    private func connectEmbeddedVPNForPendingSession(
+        _ vpn: EmbeddedVPNService,
+        attempt: UUID
+    ) async throws {
+        if vpn.status != .connected {
+            await vpn.connect()
+        }
+        try Task.checkCancellation()
+        guard sessionAttemptIdentifier == attempt, pendingSession != nil,
+              !workerIsRunning else { return }
+        guard vpn.status == .connected else {
+            fail(vpn.errorMessage ?? "The built-in VPN could not connect. Try again from Settings.")
+            return
+        }
+        if isMobileDataStartupMode {
+            enterMobileDataGuidance()
+        } else {
+            beginDiscovery(showConnectionHelpIfUnavailable: true)
+        }
     }
 
 }

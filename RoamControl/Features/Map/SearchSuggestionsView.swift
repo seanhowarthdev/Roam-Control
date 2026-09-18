@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SearchSuggestionsView: View {
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let suggestions: [MapSearchSuggestion]
     let onSelect: (MapSearchSuggestion) -> Void
@@ -35,7 +36,7 @@ struct SearchSuggestionsView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(accessibilityLabel(for: suggestion))
-                .accessibilityHint("Selects this location")
+                .accessibilityHint(AppLocalization.text("Selects this location", locale: locale))
 
                 if index < suggestions.count - 1 {
                     Divider()
@@ -56,6 +57,6 @@ struct SearchSuggestionsView: View {
             CharacterSet(charactersIn: "\u{200B}\u{200C}\u{200D}\u{FEFF}")
         )
         let detail = suggestion.subtitle.trimmingCharacters(in: invisibleCharacters)
-        return detail.isEmpty ? "Location details unavailable" : detail
+        return detail.isEmpty ? AppLocalization.text("Location details unavailable", locale: locale) : detail
     }
 }

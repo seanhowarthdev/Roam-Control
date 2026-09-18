@@ -59,8 +59,8 @@ Before creating an archive:
 4. Use the Release configuration.
 5. Confirm the app icon and display name.
 6. Set and verify the build timestamp.
-7. For a configured public build, set the self-hosted ingestion token and any TelemetryDeck identifiers in the ignored private configuration.
-8. Confirm no live ingestion token is tracked or shown in the staged diff.
+7. Confirm no telemetry destination is present in the built Info.plist.
+8. Run the disabled-statistics and release-invariant checks.
 9. Confirm `RoamPairingFFI.xcframework` is embedded and signed.
 10. Build once for a physical iPhone.
 
@@ -82,21 +82,12 @@ SideStore re-signing and Apple's free-account limits can affect expiry, app iden
 
 Do not treat an Xcode Debug `.app` folder renamed to `.ipa` as a release package. Use the verified Release archive/package workflow.
 
-## Privacy statistics configuration
+## Local build privacy
 
-Optional statistics are sent by Roam Control's narrow first-party client. A configured release sends in parallel to the maintainer-operated HTTPS endpoint and TelemetryDeck's Ingest API. Roam Control does not embed an analytics SDK and permits only the event names and fixed fields defined in `UsageAnalyticsService.swift`.
-
-Three private build settings configure those destinations:
-
-- `ROAMCONTROL_SELFHOSTED_TELEMETRY_TOKEN`
-- `ROAMCONTROL_TELEMETRY_APP_ID`
-- `ROAMCONTROL_TELEMETRY_NAMESPACE`
-
-The self-hosted ingestion token is sensitive configuration and must never be committed, printed in release notes or included in a patch. The TelemetryDeck App ID and namespace are ingestion identifiers rather than account credentials, but they remain blank in tracked defaults. Copy `Configuration/Local.private.xcconfig.example` to the ignored `Configuration/Local.private.xcconfig` and set values only for a configured local or release build. The same private file can hold the local `DEVELOPMENT_TEAM`.
-
-The self-hosted endpoint URL is public configuration in `RoamControl-Info.plist`; without its private token it sends nothing. TelemetryDeck requires both of its private values. If both destinations are configured, the same consent-gated fixed event is sent to each in parallel. If neither destination is fully configured, no request is made.
-
-Before packaging a configured build, inspect the event structure, confirm the privacy disclosure still matches it, and run the privacy rows in the regression checklist. Never add coordinates, place text, searches, saved locations, routes, pairing material, device names, user-supplied text or diagnostic content to an event.
+This local build has no statistics sender, update checker or maintainer feedback links.
+Diagnostic types remain available for pairing, connection health and recovery.
+The app bundle identifier, Keychain service, signing configuration and version are unchanged.
+Apple MapKit search and route services remain enabled.
 
 ## Release records
 

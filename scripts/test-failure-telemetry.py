@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run production preflight observers, telemetry routing and JSON encoding offline.
+"""Run production preflight observers and disabled statistics hooks offline.
 
 Extract bounded production bodies; replace platform/network boundaries with a
 recording sender and a deliberately mismatched runtime bundle/plist fixture.
@@ -35,28 +35,19 @@ struct UIDevice { static let current = UIDevice(); let systemVersion = "27.0" }
 source = 'import Foundation\n' + fixture + helper
 keep_alive = (root / 'RoamControl/Services/BackgroundLocationKeepAlive.swift').read_text()
 source += keep_alive[keep_alive.index('struct BackgroundSessionTelemetry'):keep_alive.index('/// Receives')]
-source += analytics[analytics.index('enum UsageAnalyticsEvent:'):analytics.index('/// Sends')]
+source += analytics[analytics.index('enum UsageAnalyticsEvent:'):analytics.index('/// Compatibility')]
 source += analytics[analytics.index('struct FailureDiagnosticSnapshot'):]
-source += analytics[analytics.index('private struct SelfHostedAnalyticsSignal'):analytics.index('private struct AnalyticsConfiguration')]
-routing = analytics[analytics.index('        let diagnostic = failure?.0'):analytics.index('        guard let data = try? JSONEncoder().encode(payload)')]
-source += '''
-struct Destinations { let hasConfiguredDestination: Bool }
+source += """
 final class Recorder {
-    static let destinations = Destinations(hasConfiguredDestination: true)
-    var reportingEnabled = false
     var rows: [[String: Any]] = []
-''' + block(analytics, '    func recordFailure(\n') + '''
-    func send(_ event: UsageAnalyticsEvent, destinations: Destinations,
-              failure: (FailureDiagnosticSnapshot, FailureContext)?) {
-        let appVersion = "0.9.2"
-        let buildNumber = "60"
-        let background: BackgroundSessionTelemetry? = BackgroundSessionTelemetry(status: .receivingUpdates, started: true, schedulerAvailable: false)
-        let clientIdentifier = "anonymous-test"
-''' + routing + '''
-        rows.append(try! JSONSerialization.jsonObject(with: JSONEncoder().encode(payload)) as! [String: Any])
+    func recordFailure(_ snapshot: FailureDiagnosticSnapshot, context: FailureContext, enabled: Bool) {
+        rows.append(["event_name": snapshot.disposition.event.rawValue])
+        if snapshot.disposition == .recoverable && snapshot.isSchedulerFailure {
+            rows.append(["event_name": UsageAnalyticsEvent.failureObserved.rawValue])
+        }
     }
 }
-'''
+"""
 for component, file in [('pairing','Pairing/OnDevicePairingCoordinator.swift'), ('location','Tunnel/LocalDeviceSessionCoordinator.swift')]:
     code = (root / 'RoamControl/Services' / file).read_text()
     phase = 'OnDevicePairingPhase' if component == 'pairing' else 'DeviceSessionPhase'
@@ -101,60 +92,43 @@ do {{
     precondition(recorder.rows.count == {expected_count})
     let row = recorder.rows[0]
     precondition(row["event_name"] as? String == "{expected_event}")
-    precondition(row["failure_context"] as? String == "{component}")
-    precondition(row["failure_stage"] as? String == "schedulerRegistration")
-    precondition(row["failure_disposition"] as? String == "{expected_disposition}")
-    precondition(row["{component}_task_configuration"] as? String == "Runtime identifier wildcard not permitted")
-    precondition(row["{component}_task_registration"] as? String == "Not attempted")
-    precondition(row["runtime_bundle_identifier"] as? String == RuntimeFixture.bundleIdentifier)
-    precondition(row["permitted_background_tasks"] as? [String] == RuntimeFixture.object(forInfoDictionaryKey: "") as? [String])
-    precondition(row["ios_version"] as? String == "27.0")
-    precondition(row["scheduler_reason"] == nil)
-    precondition(row["background_keep_alive"] as? String == "coreLocation")
-    precondition(row["background_keep_alive_status"] as? String == "receivingUpdates")
-    precondition(row["background_keep_alive_started"] as? Bool == true)
-    precondition(row["bg_task_scheduler_available"] as? Bool == false)
+    precondition(captured?.stage == .schedulerRegistration)
+    precondition(captured?.disposition == .{expected_disposition})
+    precondition(captured?.taskConfigurationStatus == .runtimeIdentifierNotPermitted)
+    precondition(captured?.taskRegistrationStatus == .notAttempted)
+    precondition(captured?.runtimeBundleIdentifier == RuntimeFixture.bundleIdentifier)
+    precondition(captured?.permittedBackgroundTasks == RuntimeFixture.object(forInfoDictionaryKey: "") as? [String])
     coordinator.taskConfigurationStatus = .permitted
     coordinator.taskRegistrationStatus = .accepted
     precondition(captured?.taskConfigurationStatus == .runtimeIdentifierNotPermitted)
     precondition(captured?.taskRegistrationStatus == .notAttempted)
 }}
 ''' if component == 'location' else '')
-source += '''
-do {
-    let recorder = Recorder()
-    for disposition: FailureDisposition in [.terminal, .recoverable] {
-        for stage: FailureStage in [.schedulerRegistration, .schedulerSubmission, .pairingEngine] {
-            recorder.rows = []
-            let snapshot = FailureDiagnosticSnapshot(stage: stage, disposition: disposition,
-                schedulerReason: .notPermitted, taskConfigurationStatus: .permitted,
-                taskRegistrationStatus: .accepted)
-            recorder.recordFailure(snapshot, context: .location, enabled: false)
-            precondition(recorder.rows.isEmpty)
-            recorder.recordFailure(snapshot, context: .location, enabled: true)
-            precondition(recorder.rows.count == (snapshot.isSchedulerFailure && disposition == .recoverable ? 2 : 1))
-            if snapshot.isSchedulerFailure {
-                precondition(recorder.rows.filter { $0["event_name"] as? String == "RoamControl.Failure.Observed" }.count == 1)
-            } else {
-                precondition(recorder.rows[0]["runtime_bundle_identifier"] == nil)
-                precondition(recorder.rows[0]["permitted_background_tasks"] == nil)
-                precondition(recorder.rows[0]["scheduler_reason"] == nil)
-            }
+source += analytics[analytics.index('/// Compatibility'):analytics.index('// Captured before callbacks')]
+source += """
+@MainActor func checkDisabledStatistics() {
+        let name = "RoamControl.DisabledStatistics.Test.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        defer { defaults.removePersistentDomain(forName: name) }
+        defaults.set("old-id", forKey: "anonymousUsageIdentifier")
+        defaults.set(true, forKey: "sharesAnonymousUsageStatistics")
+        defaults.set(true, forKey: "hasReportedAnalyticsParticipation")
+        defaults.set("keep", forKey: "unrelatedPreference")
+        let service = UsageAnalyticsService(preferences: defaults)
+        for enabled in [false, true] {
+            service.recordActivation(enabled: enabled)
+            service.record(.pairingCompleted, enabled: enabled)
+            service.recordFailure(.pairingEngine, context: .pairing, enabled: enabled)
+            service.recordFailure(FailureDiagnosticSnapshot(stage: .schedulerRegistration), context: .location, enabled: enabled)
         }
-    }
-    recorder.rows = []
-    recorder.recordFailure(FailureDiagnosticSnapshot(stage: .schedulerRegistration,
-        taskConfigurationStatus: .runtimeIdentifierNotPermitted, taskRegistrationStatus: .notAttempted),
-        context: .restoration, enabled: true)
-    precondition(recorder.rows[0]["location_task_registration"] as? String == "Not attempted")
-    recorder.rows = []
-    recorder.send(.pairingFailed, destinations: Recorder.destinations, failure: nil)
-    precondition(recorder.rows[0]["event_name"] as? String == "RoamControl.Pairing.Failed")
-    precondition(recorder.rows[0]["failure_stage"] == nil)
-    precondition(recorder.rows[0]["runtime_bundle_identifier"] == nil)
+        precondition(defaults.object(forKey: "anonymousUsageIdentifier") == nil)
+        precondition(defaults.object(forKey: "sharesAnonymousUsageStatistics") == nil)
+        precondition(defaults.object(forKey: "hasReportedAnalyticsParticipation") == nil)
+        precondition(defaults.string(forKey: "unrelatedPreference") == "keep")
+        print("Disabled statistics and identity cleanup checks passed")
 }
-print("Pairing/location preflight, immutable snapshot, scheduler event, privacy and JSON checks passed")
-'''
+MainActor.assumeIsolated { checkDisabledStatistics() }
+"""
 source = source.replace('Bundle.main', 'RuntimeFixture')
 with tempfile.TemporaryDirectory() as temp:
     path = Path(temp) / 'main.swift'

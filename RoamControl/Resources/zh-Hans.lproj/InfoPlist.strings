@@ -1,0 +1,2 @@
+"NSLocalNetworkUsageDescription" = "Cat Go 使用本地网络，安全配对并控制此 iPhone。";
+"NSLocationWhenInUseUsageDescription" = "Cat Go 使用位置更新，让固定位置和步行会话在后台持续运行，并在会话停止后将地图重新定位到你的真实位置。";

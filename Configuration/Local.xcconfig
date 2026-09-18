@@ -1,8 +1,6 @@
 // Safe public defaults. A checkout builds without analytics and without using
 // the repository owner's Apple development team.
+ROAMCONTROL_APP_BUNDLE_IDENTIFIER = com.sean.roamcontrol
 DEVELOPMENT_TEAM =
-ROAMCONTROL_TELEMETRY_APP_ID =
-ROAMCONTROL_TELEMETRY_NAMESPACE =
-ROAMCONTROL_SELFHOSTED_TELEMETRY_TOKEN =
 
 #include? "Local.private.xcconfig"

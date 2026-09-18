@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SessionRecoveryView: View {
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     let recovery: SessionRecoveryRecord
@@ -37,14 +38,14 @@ struct SessionRecoveryView: View {
         }
         .shadow(color: .black.opacity(0.24), radius: 28, y: 12)
         .confirmationDialog(
-            "Restore this iPhone's real location?",
+            AppLocalization.text("Restore this iPhone's real location?", locale: locale),
             isPresented: $isConfirmingRestore,
             titleVisibility: .visible
         ) {
-            Button("Restore Real Location", role: .destructive, action: onRestore)
-            Button("Keep Recovery Options", role: .cancel) {}
+            Button(AppLocalization.text("Restore Real Location", locale: locale), role: .destructive, action: onRestore)
+            Button(AppLocalization.text("Keep Recovery Options", locale: locale), role: .cancel) {}
         } message: {
-            Text("Roam Control will reconnect only long enough to clear the simulated location. It will not start a new location or walking session.")
+            Text(AppLocalization.text("Roam Control will reconnect only long enough to clear the simulated location. It will not start a new location or walking session.", locale: locale))
         }
     }
 
@@ -74,10 +75,10 @@ struct SessionRecoveryView: View {
             }
 
             VStack(spacing: 9) {
-                Text("Previous Session Interrupted")
+                Text(AppLocalization.text("Previous Session Interrupted", locale: locale))
                     .font(.title2.bold())
 
-                Text(summaryText)
+                Text(AppLocalization.text(summaryText, locale: locale))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -87,21 +88,21 @@ struct SessionRecoveryView: View {
             VStack(spacing: 10) {
                 recoveryDetail(
                     title: recovery.isWalkingRoute ? "Last saved point" : "Last location",
-                    value: recovery.lastReportedLocation.name,
+                    value: recovery.lastReportedLocation.displayName(locale: locale),
                     symbol: "mappin.and.ellipse"
                 )
 
                 if let destination = recovery.destination, recovery.isWalkingRoute {
                     recoveryDetail(
                         title: "Destination",
-                        value: destination.name,
+                        value: destination.displayName(locale: locale),
                         symbol: "flag.checkered"
                     )
                 }
 
                 recoveryDetail(
                     title: "Last active",
-                    value: recovery.updatedAt.formatted(date: .abbreviated, time: .shortened),
+                    value: recovery.updatedAt.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale)),
                     symbol: "clock"
                 )
             }
@@ -111,16 +112,16 @@ struct SessionRecoveryView: View {
             if isResuming || isRestoring {
                 HStack(spacing: 10) {
                     ProgressView()
-                    Text(isRestoring ? "Restoring this iPhone's real location…" : "Preparing the route…")
+                    Text(AppLocalization.text(isRestoring ? "Restoring this iPhone's real location…" : "Preparing the route…", locale: locale))
                         .font(.subheadline.weight(.semibold))
                 }
                 .frame(maxWidth: .infinity)
 
-                Button("Cancel Restoration", role: .cancel, action: onCancel)
+                Button(AppLocalization.text("Cancel Restoration", locale: locale), role: .cancel, action: onCancel)
                     .foregroundStyle(.secondary)
             } else {
                 Button(action: onResume) {
-                    Label(resumeTitle, systemImage: recovery.isWalkingRoute ? "figure.walk" : "arrow.clockwise")
+                    Label(AppLocalization.text(resumeTitle, locale: locale), systemImage: recovery.isWalkingRoute ? "figure.walk" : "arrow.clockwise")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -130,34 +131,34 @@ struct SessionRecoveryView: View {
                 Button(role: .destructive) {
                     isConfirmingRestore = true
                 } label: {
-                    Label("Restore Real Location", systemImage: "location.slash.fill")
+                    Label(AppLocalization.text("Restore Real Location", locale: locale), systemImage: "location.slash.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
                 .disabled(!isPaired)
 
-                Button("My Real Location Is Already Back", action: onAlreadyRestored)
+                Button(AppLocalization.text("My Real Location Is Already Back", locale: locale), action: onAlreadyRestored)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
             if !isPaired {
-                Label("Pair this iPhone before resuming or restoring the session.", systemImage: "iphone.and.arrow.forward")
+                Label(AppLocalization.text("Pair this iPhone before resuming or restoring the session.", locale: locale), systemImage: "iphone.and.arrow.forward")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
             if let errorMessage {
-                Text(errorMessage)
+                Text(AppLocalization.text(errorMessage, locale: locale))
                     .font(.caption)
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("Restoring reconnects only long enough to clear the simulated location. Nothing starts automatically. Keep Roam Control open until it finishes.")
+            Text(AppLocalization.text("Restoring reconnects only long enough to clear the simulated location. Nothing starts automatically. Keep Roam Control open until it finishes.", locale: locale))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
@@ -167,10 +168,10 @@ struct SessionRecoveryView: View {
 
     private var summaryText: String {
         if let destination = recovery.destination, recovery.isWalkingRoute {
-            return "Roam Control closed before it could confirm that the simulated walk to \(destination.name) ended. Continue from the last saved point or restore this iPhone's real location."
+            return "Roam Control closed before it could confirm that the simulated walk to \(destination.displayName(locale: locale)) ended. Continue from the last saved point or restore this iPhone's real location."
         }
 
-        return "Roam Control closed before it could confirm that the simulated location at \(recovery.lastReportedLocation.name) ended. Choose what this iPhone should do next."
+        return "Roam Control closed before it could confirm that the simulated location at \(recovery.lastReportedLocation.displayName(locale: locale)) ended. Choose what this iPhone should do next."
     }
 
     private var resumeTitle: String {
@@ -186,7 +187,7 @@ struct SessionRecoveryView: View {
                         .frame(width: 22)
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(title)
+                        Text(AppLocalization.text(title, locale: locale))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Text(value)
@@ -201,7 +202,7 @@ struct SessionRecoveryView: View {
                         .foregroundStyle(.blue)
                         .frame(width: 22)
 
-                    Text(title)
+                    Text(AppLocalization.text(title, locale: locale))
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
@@ -214,6 +215,6 @@ struct SessionRecoveryView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title), \(value)")
+        .accessibilityLabel("\(AppLocalization.text(title, locale: locale)), \(value)")
     }
 }

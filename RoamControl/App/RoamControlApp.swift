@@ -5,6 +5,7 @@ struct RoamControlApp: App {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @State private var appModel = AppModel()
+    @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.automatic.rawValue
 
     var body: some Scene {
         WindowGroup {
@@ -22,6 +23,7 @@ struct RoamControlApp: App {
                 }
             }
                 .environment(appModel)
+                .environment(\.locale, (AppLanguage(rawValue: language) ?? .automatic).locale)
                 .preferredColorScheme(preferredColorScheme)
                 .animation(
                     reduceMotion ? nil : .easeInOut(duration: 0.25),

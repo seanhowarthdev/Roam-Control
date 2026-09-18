@@ -1,12 +1,13 @@
 import SwiftUI
 
 struct AboutRoamControlView: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         List {
             appSummary
             quickStart
 
-            Section("Choose a location") {
+            Section(AppLocalization.text("Choose a location", locale: locale)) {
                 guideRow(
                     "Search",
                     symbol: "magnifyingglass",
@@ -29,7 +30,7 @@ struct AboutRoamControlView: View {
                 )
             }
 
-            Section("Map controls") {
+            Section(AppLocalization.text("Map controls", locale: locale)) {
                 guideRow(
                     "Current location",
                     symbol: "location.fill",
@@ -52,11 +53,11 @@ struct AboutRoamControlView: View {
                 )
             }
 
-            Section("Location control") {
+            Section(AppLocalization.text("Location control", locale: locale)) {
                 guideRow(
                     "Start Location",
                     symbol: "location.fill",
-                    text: "Start reporting the selected place as this iPhone’s location. LocalDevVPN must be connected."
+                    text: "Start reporting the selected place as this iPhone’s location. The built-in local VPN must be connected."
                 )
                 guideRow(
                     "Update Location",
@@ -80,7 +81,7 @@ struct AboutRoamControlView: View {
                 )
             }
 
-            Section("Walking routes") {
+            Section(AppLocalization.text("Walking routes", locale: locale)) {
                 guideRow(
                     "Preview Walking Route",
                     symbol: "figure.walk",
@@ -118,11 +119,11 @@ struct AboutRoamControlView: View {
                 )
             }
 
-            Section("Setup & support") {
+            Section(AppLocalization.text("Setup & support", locale: locale)) {
                 guideRow(
                     "Pairing & Connection",
                     symbol: "iphone.and.arrow.forward",
-                    text: "Pair this iPhone once so Roam Control can identify it through LocalDevVPN."
+                    text: "Pair this iPhone once so Roam Control can identify it through the built-in local VPN."
                 )
                 guideRow(
                     "Connection Health",
@@ -137,39 +138,29 @@ struct AboutRoamControlView: View {
                 guideRow(
                     "Reset Roam Control",
                     symbol: "arrow.counterclockwise",
-                    text: "Erase the pairing record and all saved app choices, then return to onboarding. LocalDevVPN itself is not changed."
+                    text: "Erase the pairing record and all saved app choices, then return to onboarding. The built-in VPN configuration is not changed."
                 )
             }
         }
-        .navigationTitle("About Roam Control")
+        .navigationTitle(AppLocalization.text("About Roam Control", locale: locale))
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var appSummary: some View {
         Section {
             VStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [.blue, .cyan],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 74, height: 74)
-
-                    Image(systemName: "location.north.circle.fill")
-                        .font(.system(size: 38, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .accessibilityHidden(true)
-                }
+                Image("CatGoLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 74, height: 74)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .accessibilityHidden(true)
 
                 VStack(spacing: 5) {
-                    Text("Roam Control")
+                    Text(AppLocalization.text("Roam Control", locale: locale))
                         .font(.title2.bold())
 
-                    Text("Choose, test and move this iPhone’s reported location from one clean map.")
+                    Text(AppLocalization.text("Choose, test and move this iPhone’s reported location from one clean map.", locale: locale))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -184,30 +175,30 @@ struct AboutRoamControlView: View {
     private var quickStart: some View {
         Section {
             stepRow(1, "Pair this iPhone once.")
-            stepRow(2, "Connect LocalDevVPN.")
+            stepRow(2, "Connect the Built-in Local VPN in Settings.")
             stepRow(3, "Search, choose or drop a location.")
             stepRow(4, "Start a fixed location or preview a walking route.")
         } header: {
-            Text("How it works")
+            Text(AppLocalization.text("How it works", locale: locale))
         } footer: {
-            Text("Roam Control is intended for location-based app development and testing on your own device.")
+            Text(AppLocalization.text("Roam Control is intended for location-based app development and testing on your own device.", locale: locale))
         }
     }
 
     private func stepRow(_ number: Int, _ text: String) -> some View {
         HStack(spacing: 12) {
-            Text("\(number)")
+            Text(AppLocalization.text("\(number)", locale: locale))
                 .font(.caption.bold())
                 .foregroundStyle(.white)
                 .frame(width: 24, height: 24)
                 .background(.blue, in: Circle())
 
-            Text(text)
+            Text(AppLocalization.text(text, locale: locale))
                 .font(.subheadline)
         }
         .padding(.vertical, 2)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Step \(number). \(text)")
+        .accessibilityLabel(AppLocalization.text("Step \(number). \(AppLocalization.text(text, locale: locale))", locale: locale))
     }
 
     private func guideRow(_ title: String, symbol: String, text: String) -> some View {
@@ -219,10 +210,10 @@ struct AboutRoamControlView: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(title)
+                Text(AppLocalization.text(title, locale: locale))
                     .font(.subheadline.weight(.semibold))
 
-                Text(text)
+                Text(AppLocalization.text(text, locale: locale))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -230,7 +221,7 @@ struct AboutRoamControlView: View {
         }
         .padding(.vertical, 3)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title). \(text)")
+        .accessibilityLabel(AppLocalization.text("\(AppLocalization.text(title, locale: locale)). \(AppLocalization.text(text, locale: locale))", locale: locale))
     }
 }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct StatusCard: View {
+    @Environment(\.locale) private var locale
     let state: ConnectionState
 
     var body: some View {
@@ -9,8 +10,8 @@ struct StatusCard: View {
                 .foregroundStyle(tint)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.headline)
-                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                Text(AppLocalization.text(title, locale: locale)).font(.headline)
+                Text(AppLocalization.text(detail, locale: locale)).font(.subheadline).foregroundStyle(.secondary)
             }
 
             Spacer()

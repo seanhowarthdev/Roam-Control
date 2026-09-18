@@ -131,3 +131,13 @@ Use this checklist before packaging an IPA or declaring a development build stab
 - [ ] Build succeeded in Release configuration.
 - [ ] Version/build values match the planned package.
 - [ ] Any known issue is recorded before distribution.
+
+## 应用语言（仅显示层）
+
+- 在设置的“语言”按钮中切换“跟随系统 / 简体中文 / English”，确认当前页面立即更新、重启后选择保留。
+- 修改主题和地图样式后切换语言，确认这些偏好不变；收藏名称、收藏顺序、历史记录、配对记录均不变。
+- 在地图选中地点并输入搜索文字后切换语言，确认地图选择、搜索文字和当前操作保留；自定义名称及地图服务提供的地点名称不被当作界面文案翻译。
+- 在实体 iPhone 的固定位置、步行中及暂停状态下切换语言，确认连接不中断，位置、路线、步行速度和进度不变；更新位置、暂停/继续、停止并恢复仍正常。
+- 检查引导、配对、内置 VPN、连接检查、恢复选项、更新提示、确认弹窗及辅助功能标签；中文长文案在大字体下应完整显示。
+- 系统权限弹窗遵循 iOS 的应用/系统语言；许可证原文和复制的诊断报告保留原有内容。
+- 运行 `python3 scripts/test-localization.py`，检查中文覆盖、英文原文、重复键、动态参数、语言保存及用户内容保留；再运行现有 `scripts/test-*.py` 回归检查。

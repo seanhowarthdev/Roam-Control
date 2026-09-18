@@ -179,7 +179,7 @@ final class OnDevicePairingCoordinator {
             else { return }
 
             var result = RCRemotePairingResult()
-            let returnCode = "Roam Control".withCString { hostName in
+            let returnCode = "Cat Go".withCString { hostName in
                 "Mac17,7".withCString { hostModel in
                     rc_remote_pairing_session_run(
                         session,

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MapSearchBar: View {
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Binding var query: String
     @FocusState.Binding var isFocused: Bool
@@ -45,7 +46,7 @@ struct MapSearchBar: View {
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
 
-            TextField("Search places or coordinates", text: $query)
+            TextField(AppLocalization.text("Search places or coordinates", locale: locale), text: $query)
                 .focused($isFocused)
                 .textInputAutocapitalization(.words)
                 .autocorrectionDisabled()
@@ -65,20 +66,20 @@ struct MapSearchBar: View {
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Clear search")
+                .accessibilityLabel(AppLocalization.text("Clear search", locale: locale))
             }
         }
         .frame(minHeight: 44)
     }
 
     private var dismissKeyboardButton: some View {
-        Button("Done") {
+        Button(AppLocalization.text("Done", locale: locale)) {
             isFocused = false
         }
         .font(.subheadline.weight(.semibold))
         .buttonStyle(.plain)
         .frame(minWidth: 44, minHeight: 44)
-        .accessibilityLabel("Dismiss keyboard")
-        .accessibilityHint("Dismisses the keyboard")
+        .accessibilityLabel(AppLocalization.text("Dismiss keyboard", locale: locale))
+        .accessibilityHint(AppLocalization.text("Dismisses the keyboard", locale: locale))
     }
 }

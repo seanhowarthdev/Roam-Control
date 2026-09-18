@@ -2,13 +2,13 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct PairingSetupView: View {
+    @Environment(\.locale) private var locale
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isImporting = false
     @State private var isConfirmingRemoval = false
 
-    private let localDevVPNURL = URL(string: "https://apps.apple.com/app/localdevvpn/id6755608044")!
 
     var body: some View {
         NavigationStack {
@@ -21,11 +21,11 @@ struct PairingSetupView: View {
                 .padding(16)
             }
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("Device Setup")
+            .navigationTitle(AppLocalization.text("Device Setup", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(AppLocalization.text("Done", locale: locale)) { dismiss() }
                 }
             }
         }
@@ -38,15 +38,15 @@ struct PairingSetupView: View {
             Task { await appModel.importPairingRecord(from: url) }
         }
         .confirmationDialog(
-            "Remove this pairing record?",
+            AppLocalization.text("Remove this pairing record?", locale: locale),
             isPresented: $isConfirmingRemoval,
             titleVisibility: .visible
         ) {
-            Button("Remove Pairing", role: .destructive) {
+            Button(AppLocalization.text("Remove Pairing", locale: locale), role: .destructive) {
                 Task { await appModel.removePairingRecord() }
             }
         } message: {
-            Text("Roam Control will need a new RPPairing file before it can connect again.")
+            Text(AppLocalization.text("Roam Control will need a new RPPairing file before it can connect again.", locale: locale))
         }
     }
 
@@ -60,9 +60,9 @@ struct PairingSetupView: View {
                     .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(statusTitle)
+                    Text(AppLocalization.text(statusTitle, locale: locale))
                         .font(.headline)
-                    Text(statusMessage)
+                    Text(AppLocalization.text(statusMessage, locale: locale))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -71,7 +71,7 @@ struct PairingSetupView: View {
                 Spacer(minLength: 0)
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(statusTitle). \(statusMessage)")
+            .accessibilityLabel(AppLocalization.text("\(AppLocalization.text(statusTitle, locale: locale)). \(AppLocalization.text(statusMessage, locale: locale))", locale: locale))
 
             if case .paired(let summary) = appModel.pairingStatus {
                 Divider()
@@ -80,16 +80,16 @@ struct PairingSetupView: View {
 
                 pairingDetail(
                     title: "Added",
-                    value: summary.importedAt.formatted(date: .abbreviated, time: .shortened)
+                    value: summary.importedAt.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(locale))
                 )
 
-                Button("Replace Pairing File") {
+                Button(AppLocalization.text("Replace Pairing File", locale: locale)) {
                     isImporting = true
                 }
                 .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity)
 
-                Button("Remove Pairing", role: .destructive) {
+                Button(AppLocalization.text("Remove Pairing", locale: locale), role: .destructive) {
                     isConfirmingRemoval = true
                 }
                 .frame(maxWidth: .infinity)
@@ -98,7 +98,7 @@ struct PairingSetupView: View {
 
                 if appModel.onDevicePairing.isAvailableOnThisDevice {
                     if appModel.onDevicePairing.isRunning {
-                        Button("Cancel Pairing", role: .cancel) {
+                        Button(AppLocalization.text("Cancel Pairing", locale: locale), role: .cancel) {
                             appModel.cancelOnDevicePairing()
                         }
                         .buttonStyle(.bordered)
@@ -107,7 +107,7 @@ struct PairingSetupView: View {
                         Button {
                             appModel.startOnDevicePairing()
                         } label: {
-                            Label("Pair This iPhone", systemImage: "iphone.and.arrow.forward")
+                            Label(AppLocalization.text("Pair This iPhone", locale: locale), systemImage: "iphone.and.arrow.forward")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
@@ -115,7 +115,7 @@ struct PairingSetupView: View {
                         .disabled(isBusy)
                     }
                 } else {
-                    Label("On-device pairing needs your physical iPhone.", systemImage: "iphone")
+                    Label(AppLocalization.text("On-device pairing needs your physical iPhone.", locale: locale), systemImage: "iphone")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -123,7 +123,7 @@ struct PairingSetupView: View {
                 Button {
                     isImporting = true
                 } label: {
-                    Label("Import Existing File", systemImage: "doc.badge.plus")
+                    Label(AppLocalization.text("Import Existing File", locale: locale), systemImage: "doc.badge.plus")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -141,7 +141,7 @@ struct PairingSetupView: View {
         case .preparing:
             Divider()
             Label {
-                Text("Preparing a secure pairing session…")
+                Text(AppLocalization.text("Preparing a secure pairing session…", locale: locale))
             } icon: {
                 ProgressView()
             }
@@ -150,7 +150,7 @@ struct PairingSetupView: View {
         case .waitingForSettings:
             Divider()
             VStack(alignment: .leading, spacing: 10) {
-                Text("Finish in Settings")
+                Text(AppLocalization.text("Finish in Settings", locale: locale))
                     .font(.subheadline.weight(.semibold))
                 instructionRow("Open Settings › Privacy & Security › Developer Mode.")
                 instructionRow("Tap Pair with Roam Control.")
@@ -160,7 +160,7 @@ struct PairingSetupView: View {
         case .showingPIN(let pin):
             Divider()
             VStack(alignment: .leading, spacing: 8) {
-                Text("Enter this code in Settings")
+                Text(AppLocalization.text("Enter this code in Settings", locale: locale))
                     .font(.subheadline.weight(.semibold))
                 Text(pin.map(String.init).joined(separator: " "))
                     .font(.largeTitle.weight(.semibold))
@@ -169,8 +169,8 @@ struct PairingSetupView: View {
                     .foregroundStyle(.blue)
                     .minimumScaleFactor(0.7)
                     .lineLimit(1)
-                    .accessibilityLabel("Pairing code \(pin)")
-                Text("The code is generated on this iPhone and expires with this pairing attempt.")
+                    .accessibilityLabel(AppLocalization.text("Pairing code \(pin)", locale: locale))
+                Text(AppLocalization.text("The code is generated on this iPhone and expires with this pairing attempt.", locale: locale))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -178,7 +178,7 @@ struct PairingSetupView: View {
         case .storing:
             Divider()
             Label {
-                Text("Securing the pairing record in Keychain…")
+                Text(AppLocalization.text("Securing the pairing record in Keychain…", locale: locale))
             } icon: {
                 ProgressView()
             }
@@ -187,7 +187,7 @@ struct PairingSetupView: View {
         case .cancelling:
             Divider()
             Label {
-                Text("Stopping pairing…")
+                Text(AppLocalization.text("Stopping pairing…", locale: locale))
             } icon: {
                 ProgressView()
             }
@@ -197,20 +197,14 @@ struct PairingSetupView: View {
 
     private var requirementsCard: some View {
         setupCard {
-            Text("Before connecting")
+            Text(AppLocalization.text("Before connecting", locale: locale))
                 .font(.headline)
 
             requirementRow(number: "1", text: "Pair this iPhone here, or import its existing RPPairing file.")
-            requirementRow(number: "2", text: "Install LocalDevVPN and switch it on.")
+            requirementRow(number: "2", text: "Connect the Built-in Local VPN in Settings. No separate app is needed.")
             requirementRow(number: "3", text: "Keep Developer Mode enabled on the iPhone.")
 
-            Link(destination: localDevVPNURL) {
-                Label("View LocalDevVPN", systemImage: "arrow.up.right.square")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-
-            Text("New on-device pairing is available on iOS 27. The simulator can test the screen, but Apple only exposes the real handshake on a physical iPhone.")
+            Text(AppLocalization.text("New on-device pairing is available on iOS 27. The simulator can test the screen, but Apple only exposes the real handshake on a physical iPhone.", locale: locale))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -219,11 +213,11 @@ struct PairingSetupView: View {
 
     private var privacyCard: some View {
         setupCard {
-            Label("Stored securely", systemImage: "lock.shield")
+            Label(AppLocalization.text("Stored securely", locale: locale), systemImage: "lock.shield")
                 .font(.headline)
                 .foregroundStyle(.green)
 
-            Text("The pairing record is generated or checked on this iPhone, then stored only in its Keychain. Roam Control does not upload it.")
+            Text(AppLocalization.text("The pairing record is generated or checked on this iPhone, then stored only in its Keychain. Roam Control does not upload it.", locale: locale))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -239,19 +233,19 @@ struct PairingSetupView: View {
 
     private func requirementRow(number: String, text: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            Text(number)
+            Text(AppLocalization.text(number, locale: locale))
                 .font(.caption.bold())
                 .foregroundStyle(.white)
                 .frame(width: 24, height: 24)
                 .background(.blue, in: Circle())
 
-            Text(text)
+            Text(AppLocalization.text(text, locale: locale))
                 .font(.subheadline)
                 .padding(.top, 2)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Step \(number). \(text)")
+        .accessibilityLabel(AppLocalization.text("Step \(number). \(AppLocalization.text(text, locale: locale))", locale: locale))
     }
 
     private func instructionRow(_ text: String) -> some View {
@@ -260,12 +254,12 @@ struct PairingSetupView: View {
                 .font(.caption.bold())
                 .foregroundStyle(.blue)
                 .padding(.top, 3)
-            Text(text)
+            Text(AppLocalization.text(text, locale: locale))
                 .font(.subheadline)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(text)
+        .accessibilityLabel(AppLocalization.text(text, locale: locale))
     }
 
     private func pairingDetail(
@@ -276,21 +270,21 @@ struct PairingSetupView: View {
         Group {
             if dynamicTypeSize.isAccessibilitySize {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
+                    Text(AppLocalization.text(title, locale: locale))
                         .foregroundStyle(.secondary)
-                    Text(value)
+                    Text(AppLocalization.text(value, locale: locale))
                         .textSelection(.enabled)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .font(monospaced ? .caption.monospaced() : .caption)
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
-                LabeledContent(title, value: value)
+                LabeledContent(AppLocalization.text(title, locale: locale), value: AppLocalization.text(value, locale: locale))
                     .font(monospaced ? .caption.monospaced() : .caption)
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title), \(value)")
+        .accessibilityLabel(AppLocalization.text("\(AppLocalization.text(title, locale: locale)), \(AppLocalization.text(value, locale: locale))", locale: locale))
     }
 
     private var allowedPairingTypes: [UTType] {
@@ -391,7 +385,7 @@ struct PairingSetupView: View {
                 ? "Create the pairing securely on this iPhone, or import an existing file."
                 : "Connect your physical iPhone to create the pairing, or import an existing file."
         case .paired:
-            return "Roam Control can use this record when the LocalDevVPN session layer is connected."
+            return "Roam Control can use this record when the built-in local VPN is connected."
         case .failed(let message):
             return message
         }

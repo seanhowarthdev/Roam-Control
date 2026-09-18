@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SavedPlacesView: View {
+    @Environment(\.locale) private var locale
     private enum ClearTarget: String, Identifiable {
         case favourites
         case history
@@ -50,13 +51,13 @@ struct SavedPlacesView: View {
                                 Button(role: .destructive) {
                                     onDeleteFavourite(location)
                                 } label: {
-                                    Label("Delete", systemImage: "trash")
+                                    Label(AppLocalization.text("Delete", locale: locale), systemImage: "trash")
                                 }
 
                                 Button {
                                     beginRenaming(location)
                                 } label: {
-                                    Label("Rename", systemImage: "pencil")
+                                    Label(AppLocalization.text("Rename", locale: locale), systemImage: "pencil")
                                 }
                                 .tint(.blue)
                             }
@@ -65,10 +66,10 @@ struct SavedPlacesView: View {
                     }
                 } header: {
                     HStack {
-                        Text("Favourites")
+                        Text(AppLocalization.text("Favourites", locale: locale))
                         Spacer()
                         if !favourites.isEmpty {
-                            Button("Clear") {
+                            Button(AppLocalization.text("Clear", locale: locale)) {
                                 clearTarget = .favourites
                             }
                             .textCase(nil)
@@ -76,7 +77,7 @@ struct SavedPlacesView: View {
                     }
                 } footer: {
                     if shouldShowFavouriteReorderHint && favourites.count >= 2 {
-                        Text("Tap Edit to rearrange favourites.")
+                        Text(AppLocalization.text("Tap Edit to rearrange favourites.", locale: locale))
                     }
                 }
 
@@ -99,17 +100,17 @@ struct SavedPlacesView: View {
                                 Button(role: .destructive) {
                                     onDeleteHistory(location)
                                 } label: {
-                                    Label("Delete", systemImage: "trash")
+                                    Label(AppLocalization.text("Delete", locale: locale), systemImage: "trash")
                                 }
                             }
                         }
                     }
                 } header: {
                     HStack {
-                        Text("History")
+                        Text(AppLocalization.text("History", locale: locale))
                         Spacer()
                         if !history.isEmpty {
-                            Button("Clear") {
+                            Button(AppLocalization.text("Clear", locale: locale)) {
                                 clearTarget = .history
                             }
                                 .textCase(nil)
@@ -118,60 +119,60 @@ struct SavedPlacesView: View {
                 }
             }
             .environment(\.editMode, $editMode)
-            .navigationTitle("Saved Places")
+            .navigationTitle(AppLocalization.text("Saved Places", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if !favourites.isEmpty {
                     ToolbarItem(placement: .topBarLeading) {
-                        Button(editMode.isEditing ? "Done" : "Edit") {
+                        Button(AppLocalization.text(editMode.isEditing ? "Done" : "Edit", locale: locale)) {
                             if !editMode.isEditing {
                                 onDismissFavouriteReorderHint()
                             }
                             editMode = editMode.isEditing ? .inactive : .active
                         }
-                            .accessibilityLabel("Reorder favourites")
+                            .accessibilityLabel(AppLocalization.text("Reorder favourites", locale: locale))
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(AppLocalization.text("Done", locale: locale)) { dismiss() }
                 }
             }
             .alert(
-                "Rename Favourite",
+                AppLocalization.text("Rename Favourite", locale: locale),
                 isPresented: Binding(
                     get: { favouriteBeingRenamed != nil },
                     set: { if !$0 { favouriteBeingRenamed = nil } }
                 )
             ) {
-                TextField("Favourite name", text: $favouriteName)
-                Button("Cancel", role: .cancel) {
+                TextField(AppLocalization.text("Favourite name", locale: locale), text: $favouriteName)
+                Button(AppLocalization.text("Cancel", locale: locale), role: .cancel) {
                     favouriteBeingRenamed = nil
                 }
-                Button("Save") {
+                Button(AppLocalization.text("Save", locale: locale)) {
                     guard let favouriteBeingRenamed else { return }
                     onRenameFavourite(favouriteBeingRenamed, favouriteName)
                     self.favouriteBeingRenamed = nil
                 }
                 .disabled(favouriteName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             } message: {
-                Text("Give this saved place a name that is easy to recognise.")
+                Text(AppLocalization.text("Give this saved place a name that is easy to recognise.", locale: locale))
             }
             .confirmationDialog(
-                clearConfirmationTitle,
+                AppLocalization.text(clearConfirmationTitle, locale: locale),
                 isPresented: Binding(
                     get: { clearTarget != nil },
                     set: { if !$0 { clearTarget = nil } }
                 ),
                 titleVisibility: .visible
             ) {
-                Button(clearConfirmationButton, role: .destructive) {
+                Button(AppLocalization.text(clearConfirmationButton, locale: locale), role: .destructive) {
                     performClear()
                 }
-                Button("Cancel", role: .cancel) {
+                Button(AppLocalization.text("Cancel", locale: locale), role: .cancel) {
                     clearTarget = nil
                 }
             } message: {
-                Text(clearConfirmationMessage)
+                Text(AppLocalization.text(clearConfirmationMessage, locale: locale))
             }
         }
     }
@@ -224,6 +225,7 @@ struct SavedPlacesView: View {
 }
 
 private struct SavedPlaceRow: View {
+    @Environment(\.locale) private var locale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let location: LocationTarget
     let symbol: String
@@ -240,10 +242,10 @@ private struct SavedPlaceRow: View {
                         .frame(width: 24)
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(location.name)
+                        Text(location.displayName(locale: locale))
                             .foregroundStyle(.primary)
                             .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
-                        Text(location.subtitle)
+                        Text(location.displaySubtitle(locale: locale))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
@@ -255,7 +257,7 @@ private struct SavedPlaceRow: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(locationAccessibilityLabel)
-            .accessibilityHint("Selects this location")
+            .accessibilityHint(AppLocalization.text("Selects this location", locale: locale))
 
             Button(action: onToggleFavourite) {
                 Image(systemName: isFavourite ? "heart.fill" : "heart")
@@ -263,22 +265,23 @@ private struct SavedPlaceRow: View {
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(isFavourite ? "Remove from favourites" : "Add to favourites")
+            .accessibilityLabel(AppLocalization.text(isFavourite ? "Remove from favourites" : "Add to favourites", locale: locale))
         }
     }
 
     private var locationAccessibilityLabel: String {
-        guard !location.subtitle.isEmpty else { return location.name }
-        return "\(location.name), \(location.subtitle)"
+        guard !location.subtitle.isEmpty else { return location.displayName(locale: locale) }
+        return "\(location.displayName(locale: locale)), \(location.displaySubtitle(locale: locale))"
     }
 }
 
 private struct EmptySavedPlacesRow: View {
+    @Environment(\.locale) private var locale
     let symbol: String
     let message: String
 
     var body: some View {
-        Label(message, systemImage: symbol)
+        Label(AppLocalization.text(message, locale: locale), systemImage: symbol)
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .padding(.vertical, 8)

@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct ConnectionHealthView: View {
+    @Environment(\.locale) private var locale
     @Environment(AppModel.self) private var appModel
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var diagnostics = ConnectionDiagnosticsCoordinator()
@@ -10,7 +11,7 @@ struct ConnectionHealthView: View {
 
     var body: some View {
         List {
-            Section("Connection Health") {
+            Section(AppLocalization.text("Connection Health", locale: locale)) {
                 healthRow(
                     title: "Pairing",
                     value: pairingValue,
@@ -19,7 +20,7 @@ struct ConnectionHealthView: View {
                 )
 
                 healthRow(
-                    title: "LocalDevVPN",
+                    title: "Built-in Local VPN",
                     value: localDevVPNValue,
                     symbol: localDevVPNSymbol,
                     color: localDevVPNColor
@@ -33,18 +34,18 @@ struct ConnectionHealthView: View {
                 )
             }
 
-            Section("Restoration") {
-                Text(appModel.deviceSession.restorationStatus)
-                Text("An inactive session means Roam Control's worker has ended. Other apps may need time to acquire a fresh real location.")
+            Section(AppLocalization.text("Restoration", locale: locale)) {
+                Text(AppLocalization.text(appModel.deviceSession.restorationStatus, locale: locale))
+                Text(AppLocalization.text("An inactive session means Roam Control's worker has ended. Other apps may need time to acquire a fresh real location.", locale: locale))
                     .foregroundStyle(.secondary)
             }
 
-            Section("Current Location") {
-                LabeledContent("Place", value: activeTarget?.name ?? "None")
-                LabeledContent("Coordinates", value: coordinatesValue)
+            Section(AppLocalization.text("Current Location", locale: locale)) {
+                LabeledContent(AppLocalization.text("Place", locale: locale), value: activeTarget?.displayName(locale: locale) ?? AppLocalization.text("None", locale: locale))
+                LabeledContent(AppLocalization.text("Coordinates", locale: locale), value: AppLocalization.text(coordinatesValue, locale: locale))
 
                 if let activeTarget, !activeTarget.subtitle.isEmpty {
-                    LabeledContent("Area", value: activeTarget.subtitle)
+                    LabeledContent(AppLocalization.text("Area", locale: locale), value: activeTarget.displaySubtitle(locale: locale))
                 }
             }
 
@@ -53,7 +54,7 @@ struct ConnectionHealthView: View {
                     Task { await runConnectionCheck() }
                 } label: {
                     HStack {
-                        Label("Run Connection Check", systemImage: "stethoscope")
+                        Label(AppLocalization.text("Run Connection Check", locale: locale), systemImage: "stethoscope")
                         Spacer()
                         if diagnostics.state == .running {
                             ProgressView()
@@ -63,23 +64,23 @@ struct ConnectionHealthView: View {
                 .disabled(diagnostics.state == .running)
 
                 if let resultMessage {
-                    Label(resultMessage, systemImage: resultSymbol)
+                    Label(AppLocalization.text(resultMessage, locale: locale), systemImage: resultSymbol)
                         .font(.subheadline)
                         .foregroundStyle(resultColor)
                 }
 
                 if let lastChecked = diagnostics.lastChecked {
                     LabeledContent(
-                        "Last checked",
-                        value: lastChecked.formatted(date: .omitted, time: .shortened)
+                        AppLocalization.text("Last checked", locale: locale),
+                        value: AppLocalization.text(lastChecked.formatted(Date.FormatStyle(date: .omitted, time: .shortened).locale(locale)), locale: locale)
                     )
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 }
             } header: {
-                Text("Connection Check")
+                Text(AppLocalization.text("Connection Check", locale: locale))
             } footer: {
-                Text("This checks the saved pairing record and whether the paired iPhone is visible through LocalDevVPN. It never starts, changes, or stops your location.")
+                Text(AppLocalization.text("This checks the saved pairing record and whether the paired iPhone is visible through the built-in local VPN. It never starts, changes, or stops your location.", locale: locale))
             }
 
             Section {
@@ -88,37 +89,39 @@ struct ConnectionHealthView: View {
                     didCopyDiagnostics = true
                 } label: {
                     Label(
-                        didCopyDiagnostics ? "Diagnostics Copied" : "Copy Diagnostics",
+                        AppLocalization.text(didCopyDiagnostics ? "Diagnostics Copied" : "Copy Diagnostics", locale: locale),
                         systemImage: didCopyDiagnostics ? "checkmark" : "doc.on.doc"
                     )
                 }
                 .foregroundStyle(didCopyDiagnostics ? .green : .primary)
             } header: {
-                Text("Support")
+                Text(AppLocalization.text("Support", locale: locale))
             } footer: {
-                Text("Copies a status-only report you can paste into a bug report. It never includes locations, searches, pairing records, PINs, device names or error text.")
+                Text(AppLocalization.text("Copies a status-only report you can paste into a bug report. It never includes locations, searches, pairing records, PINs, device names or error text.", locale: locale))
             }
 
-            Section("Other VPNs") {
-                Text("Another VPN may affect local device connections. If it is appropriate for your network, compare a test with that VPN paused. Keep LocalDevVPN enabled when starting a location session.")
-                Text("Roam Control has not detected another VPN. This is a troubleshooting check, not a diagnosis; an iOS scheduler rejection happens before the pairing connection starts.")
+            Section(AppLocalization.text("Other VPNs", locale: locale)) {
+                Text(AppLocalization.text("Another VPN may affect local device connections. If it is appropriate for your network, compare a test with that VPN paused. Keep the built-in local VPN enabled when starting a location session.", locale: locale))
+                Text(AppLocalization.text("Roam Control has not detected another VPN. This is a troubleshooting check, not a diagnosis; an iOS scheduler rejection happens before the pairing connection starts.", locale: locale))
                     .foregroundStyle(.secondary)
             }
 
-            Section("Help") {
+            Section(AppLocalization.text("Help", locale: locale)) {
                 Button {
                     isShowingDeviceSetup = true
                 } label: {
-                    Label("Pairing & Connection", systemImage: "iphone.and.arrow.forward")
+                    Label(AppLocalization.text("Pairing & Connection", locale: locale), systemImage: "iphone.and.arrow.forward")
                 }
                 .foregroundStyle(.primary)
 
-                Link(destination: appModel.localDevVPNInstallURL) {
-                    Label("Open LocalDevVPN in App Store", systemImage: "arrow.up.right.square")
+                NavigationLink {
+                    EmbeddedVPNView()
+                } label: {
+                    Label(AppLocalization.text("Built-in Local VPN", locale: locale), systemImage: "network")
                 }
             }
         }
-        .navigationTitle("Connection Health")
+        .navigationTitle(AppLocalization.text("Connection Health", locale: locale))
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear {
             diagnostics.cancel()
@@ -205,7 +208,7 @@ struct ConnectionHealthView: View {
     private var sessionValue: String {
         switch appModel.deviceSession.phase {
         case .idle: "Inactive"
-        case .openingLocalDevVPN: "Opening LocalDevVPN"
+        case .openingLocalDevVPN: "Connecting Built-in VPN"
         case .discovering: "Finding this iPhone"
         case .connecting: "Connecting"
         case .active: "Active"
@@ -269,8 +272,8 @@ struct ConnectionHealthView: View {
                         .foregroundStyle(color)
                         .frame(width: 22)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(title)
-                        Text(value)
+                        Text(AppLocalization.text(title, locale: locale))
+                        Text(AppLocalization.text(value, locale: locale))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -280,15 +283,15 @@ struct ConnectionHealthView: View {
                     Image(systemName: symbol)
                         .foregroundStyle(color)
                         .frame(width: 22)
-                    Text(title)
+                    Text(AppLocalization.text(title, locale: locale))
                     Spacer()
-                    Text(value)
+                    Text(AppLocalization.text(value, locale: locale))
                         .foregroundStyle(.secondary)
                 }
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(title), \(value)")
+        .accessibilityLabel(AppLocalization.text("\(AppLocalization.text(title, locale: locale)), \(AppLocalization.text(value, locale: locale))", locale: locale))
     }
 
     @MainActor
@@ -313,8 +316,8 @@ struct ConnectionHealthView: View {
         )?.joined(separator: ", ") ?? "None"
         let checked = diagnostics.lastChecked?.formatted(date: .numeric, time: .standard) ?? "Not run"
 
-        return """
-        Roam Control Diagnostics
+        return AppLocalization.brandedText("""
+        Cat Go Diagnostics
         Generated: \(Date().formatted(date: .numeric, time: .standard))
         App: \(appVersion) (\(build))
         iOS: \(UIDevice.current.systemVersion)
@@ -343,7 +346,7 @@ struct ConnectionHealthView: View {
         Appearance: \(appModel.appearance.title)
         Map style: \(appModel.mapDisplayStyle.title)
         Location data: Not included
-        """
+        """)
     }
 
     private var diagnosticResultStatus: String {

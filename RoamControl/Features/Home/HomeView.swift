@@ -2,6 +2,7 @@ import MapKit
 import SwiftUI
 
 struct HomeView: View {
+    @Environment(\.locale) private var locale
     @Environment(AppModel.self) private var appModel
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -41,12 +42,12 @@ struct HomeView: View {
                     }
 
                     if let target = mapModel.selectedLocation {
-                        Marker(target.name, coordinate: target.coordinate)
+                        Marker(target.displayName(locale: locale), coordinate: target.coordinate)
                             .tint(.blue)
                     }
 
                     if let coordinate = walkingSimulation.currentCoordinate {
-                        Annotation("Walking location", coordinate: coordinate) {
+                        Annotation(AppLocalization.text("Walking location", locale: locale), coordinate: coordinate) {
                             Image(systemName: "figure.walk.circle.fill")
                                 .font(.title.weight(.semibold))
                                 .foregroundStyle(.white, .green)
@@ -109,7 +110,7 @@ struct HomeView: View {
                         ConnectionBadge(state: appModel.connectionState)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityHint("Opens device pairing setup")
+                    .accessibilityHint(AppLocalization.text("Opens device pairing setup", locale: locale))
 
                     Spacer()
 
@@ -126,7 +127,7 @@ struct HomeView: View {
                                 .frame(width: 44, height: 44)
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Favourites and history")
+                        .accessibilityLabel(AppLocalization.text("Favourites and history", locale: locale))
 
                         Button {
                             isShowingSettings = true
@@ -140,7 +141,7 @@ struct HomeView: View {
                                 .frame(width: 44, height: 44)
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Settings")
+                        .accessibilityLabel(AppLocalization.text("Settings", locale: locale))
                     }
                     }
 
@@ -154,10 +155,10 @@ struct HomeView: View {
                                 .foregroundStyle(.blue)
 
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Pair this iPhone")
+                                Text(AppLocalization.text("Pair this iPhone", locale: locale))
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(.primary)
-                                Text("Required before location control")
+                                Text(AppLocalization.text("Required before location control", locale: locale))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -190,7 +191,7 @@ struct HomeView: View {
                                     .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Return map to north")
+                            .accessibilityLabel(AppLocalization.text("Return map to north", locale: locale))
                             .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
                         }
 
@@ -214,7 +215,7 @@ struct HomeView: View {
                             }
                             .buttonStyle(.plain)
                             .disabled(mapModel.isFindingRealLocation)
-                            .accessibilityLabel("Show my current location")
+                            .accessibilityLabel(AppLocalization.text("Show my current location", locale: locale))
                         }
                     }
                     }
@@ -258,7 +259,6 @@ struct HomeView: View {
                         isFavourite: mapModel.selectedLocation.map(appModel.isFavourite) ?? false,
                         isPaired: isPaired,
                         sessionPhase: appModel.deviceSession.phase,
-                        localDevVPNInstallURL: appModel.localDevVPNInstallURL,
                         isPreviewingWalkingRoute: walkingRoutePlanner.isLoading,
                         walkingRouteError: walkingRoutePlanner.errorMessage,
                         onToggleFavourite: {
@@ -302,7 +302,7 @@ struct HomeView: View {
             if let message = mapModel.errorMessage {
                 VStack {
                     Spacer()
-                    Text(message)
+                    Text(AppLocalization.text(message, locale: locale))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16)
@@ -610,6 +610,7 @@ struct HomeView: View {
 }
 
 private struct CompassRoseDial: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         ZStack {
             Circle()
@@ -618,17 +619,17 @@ private struct CompassRoseDial: View {
             Circle()
                 .strokeBorder(.primary.opacity(0.28), lineWidth: 0.8)
 
-            Text("N")
+            Text(AppLocalization.text("N", locale: locale))
                 .foregroundStyle(.red)
                 .offset(y: -10.5)
 
-            Text("E")
+            Text(AppLocalization.text("E", locale: locale))
                 .offset(x: 10.5)
 
-            Text("S")
+            Text(AppLocalization.text("S", locale: locale))
                 .offset(y: 10.5)
 
-            Text("W")
+            Text(AppLocalization.text("W", locale: locale))
                 .offset(x: -10.5)
 
             Circle()
