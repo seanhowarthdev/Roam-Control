@@ -10,7 +10,7 @@ helper = root / 'RoamControl/Services/BackgroundTaskIdentifier.swift'
 checks = r'''
 import Foundation
 for component in ["pairing", "location"] {
-    for runtime in ["com.sean.roamcontrol", "com.sean.roamcontrol.U687363PJS"] {
+    for runtime in ["com.catgo.app", "com.catgo.app.U687363PJS"] {
         let prefix = runtime + "." + component
         precondition(BackgroundTaskIdentifier.prefix(for: component, bundleIdentifier: runtime) == prefix)
         let exact = prefix + ".*"
@@ -28,9 +28,9 @@ for component in ["pairing", "location"] {
     }
     for runtime: String? in [nil, ""] {
         precondition(BackgroundTaskIdentifier.prefix(for: component, bundleIdentifier: runtime) == nil)
-        precondition(BackgroundTaskIdentifier.configurationStatus(for: component, bundleIdentifier: runtime, permittedIdentifiers: ["com.sean.roamcontrol." + component + ".*"]) == .missingRuntimeBundleIdentifier)
+        precondition(BackgroundTaskIdentifier.configurationStatus(for: component, bundleIdentifier: runtime, permittedIdentifiers: ["com.catgo.app." + component + ".*"]) == .missingRuntimeBundleIdentifier)
     }
-    precondition(BackgroundTaskIdentifier.configurationStatus(for: component, bundleIdentifier: "com.sean.roamcontrol.U687363PJS", permittedIdentifiers: ["com.sean.roamcontrol." + component + ".*", "com.sean.roamcontrol.R9673G3XNB." + component + ".*"]) == .runtimeIdentifierNotPermitted)
+    precondition(BackgroundTaskIdentifier.configurationStatus(for: component, bundleIdentifier: "com.catgo.app.U687363PJS", permittedIdentifiers: ["com.catgo.app." + component + ".*", "com.catgo.app.R9673G3XNB." + component + ".*"]) == .runtimeIdentifierNotPermitted)
 }
 print("Runtime identifier truth-table checks passed")
 '''

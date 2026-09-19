@@ -13,6 +13,11 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("激活状态") {
+                    ActivationSummaryView()
+                        .padding(.vertical, 6)
+                    NavigationLink("激活与续费") { ActivationView() }
+                }
                 Section(AppLocalization.text("Language", locale: locale)) {
                     LanguagePicker()
                 }

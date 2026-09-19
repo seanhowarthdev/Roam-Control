@@ -454,6 +454,15 @@ struct HomeView: View {
             PairingSetupView()
                 .environment(appModel)
         }
+        .alert(appModel.activation.phase.title, isPresented: Binding(
+            get: { appModel.isShowingActivationGuidance },
+            set: { appModel.isShowingActivationGuidance = $0 }
+        )) {
+            Button("激活与续费") { isShowingDeviceSetup = true }
+            Button("取消", role: .cancel) { }
+        } message: {
+            Text(appModel.activation.phase.guidance)
+        }
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()
                 .environment(appModel)

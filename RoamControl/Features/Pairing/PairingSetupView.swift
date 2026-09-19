@@ -8,12 +8,20 @@ struct PairingSetupView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isImporting = false
     @State private var isConfirmingRemoval = false
+    @State private var isShowingActivation = false
 
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
+                    setupCard {
+                        ActivationSummaryView()
+                        Button(appModel.activation.hasCredentials ? "查看激活与续费" : "填写激活码") {
+                            isShowingActivation = true
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
                     statusCard
                     requirementsCard
                     privacyCard
@@ -27,6 +35,19 @@ struct PairingSetupView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(AppLocalization.text("Done", locale: locale)) { dismiss() }
                 }
+            }
+        }
+        .task {
+            if !appModel.activation.hasCredentials { isShowingActivation = true }
+        }
+        .sheet(isPresented: $isShowingActivation) {
+            NavigationStack {
+                ActivationView()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("完成") { isShowingActivation = false }
+                        }
+                    }
             }
         }
         .fileImporter(
@@ -84,7 +105,8 @@ struct PairingSetupView: View {
                 )
 
                 Button(AppLocalization.text("Replace Pairing File", locale: locale)) {
-                    isImporting = true
+                    if appModel.activation.isAuthorized { isImporting = true }
+                    else { isShowingActivation = true }
                 }
                 .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity)
@@ -105,7 +127,9 @@ struct PairingSetupView: View {
                         .frame(maxWidth: .infinity)
                     } else {
                         Button {
-                            appModel.startOnDevicePairing()
+                            if appModel.activation.isAuthorized {
+                                Task { await appModel.startOnDevicePairing() }
+                            } else { isShowingActivation = true }
                         } label: {
                             Label(AppLocalization.text("Pair This iPhone", locale: locale), systemImage: "iphone.and.arrow.forward")
                                 .frame(maxWidth: .infinity)
@@ -121,7 +145,8 @@ struct PairingSetupView: View {
                 }
 
                 Button {
-                    isImporting = true
+                    if appModel.activation.isAuthorized { isImporting = true }
+                    else { isShowingActivation = true }
                 } label: {
                     Label(AppLocalization.text("Import Existing File", locale: locale), systemImage: "doc.badge.plus")
                         .frame(maxWidth: .infinity)

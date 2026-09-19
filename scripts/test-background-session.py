@@ -35,8 +35,8 @@ final class CLLocationManager {
     func requestWhenInUseAuthorization() { requests += 1 }
 }
 enum RuntimeFixture {
-    static var bundleIdentifier: String? = "com.sean.roamcontrol.9THCBUH63A"
-    static var permitted = ["com.sean.roamcontrol.location.*"]
+    static var bundleIdentifier: String? = "com.catgo.app.9THCBUH63A"
+    static var permitted = ["com.catgo.app.location.*"]
     static func object(forInfoDictionaryKey: String) -> Any? { permitted }
 }
 final class FakeTask { func setTaskCompleted(success: Bool) {} }
@@ -121,7 +121,7 @@ checks = '''
         precondition(session.workers == 1 && session.failures == 0 && session.observedFailures == 1)
         precondition(session.taskConfigurationStatus == .runtimeIdentifierNotPermitted)
         precondition(session.taskRegistrationStatus == .notAttempted && BGTaskScheduler.shared.registrations == 0)
-        RuntimeFixture.permitted = ["com.sean.roamcontrol.9THCBUH63A.location.*"]
+        RuntimeFixture.permitted = ["com.catgo.app.9THCBUH63A.location.*"]
         BGTaskScheduler.shared.accepts = false
         session.submitLocationTask()
         precondition(session.workers == 2 && session.failures == 0 && session.observedFailures == 2)

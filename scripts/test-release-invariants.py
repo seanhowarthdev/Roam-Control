@@ -36,7 +36,7 @@ assert info["CFBundleName"] == "Cat Go"
 assert info["CFBundleIdentifier"] == "$(PRODUCT_BUNDLE_IDENTIFIER)"
 assert info["CFBundleURLTypes"][0]["CFBundleURLSchemes"] == ["roamcontrol"]
 public_config = (ROOT / "Configuration/Local.xcconfig").read_text()
-assert "ROAMCONTROL_APP_BUNDLE_IDENTIFIER = com.sean.roamcontrol" in public_config
+assert "ROAMCONTROL_APP_BUNDLE_IDENTIFIER = com.catgo.app" in public_config
 assert "TELEMETRY" not in public_config
 analytics = (ROOT / "RoamControl/Services/UsageAnalyticsService.swift").read_text()
 assert "URLSession" not in analytics

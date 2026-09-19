@@ -1,3 +1,7 @@
 // Copy this file to Local.private.xcconfig and fill in only the values needed
 // for your own build. Local.private.xcconfig is ignored by Git.
 DEVELOPMENT_TEAM = YOUR-APPLE-DEVELOPMENT-TEAM-ID
+
+// 按需覆盖调试或正式激活服务地址，不能带 /api 后缀。
+// CATGO_ACTIVATION_DEBUG_BASE_URL = http:$(CATGO_URL_SLASH)$(CATGO_URL_SLASH)192.168.110.119:18063
+// CATGO_ACTIVATION_BASE_URL = https:$(CATGO_URL_SLASH)$(CATGO_URL_SLASH)ios.iirrll.top

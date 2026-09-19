@@ -25,9 +25,9 @@ def block(source, marker):
 
 fixture = '''
 enum RuntimeFixture {
-    static let bundleIdentifier: String? = "com.sean.roamcontrol.TESTSUFFIX"
+    static let bundleIdentifier: String? = "com.catgo.app.TESTSUFFIX"
     static func object(forInfoDictionaryKey: String) -> Any? {
-        ["com.sean.roamcontrol.pairing.*", "com.sean.roamcontrol.location.*"]
+        ["com.catgo.app.pairing.*", "com.catgo.app.location.*"]
     }
 }
 struct UIDevice { static let current = UIDevice(); let systemVersion = "27.0" }

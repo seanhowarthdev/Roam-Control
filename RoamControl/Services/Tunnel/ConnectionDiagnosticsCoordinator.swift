@@ -19,7 +19,7 @@ final class ConnectionDiagnosticsCoordinator: NSObject {
     private var timeoutTask: Task<Void, Never>?
     private var sawNonMatchingService = false
     private var probeConnection: NWConnection?
-    private let probeQueue = DispatchQueue(label: "com.sean.roamcontrol.diagnostics-probe")
+    private let probeQueue = DispatchQueue(label: "com.catgo.app.diagnostics-probe")
 
     private(set) var state: ConnectionCheckState = .notRun
     private(set) var lastChecked: Date?

@@ -162,6 +162,12 @@ struct WalkingRoutePreviewCard: View {
                 Text(AppLocalization.text("Starting walking session…", locale: locale))
                     .font(.subheadline.weight(.medium))
             }
+            Button(action: onStop) {
+                Text(AppLocalization.text("Cancel", locale: locale))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
             .frame(maxWidth: .infinity)
 
         case .walking, .paused:

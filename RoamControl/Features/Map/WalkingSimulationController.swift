@@ -50,6 +50,10 @@ final class WalkingSimulationController {
     private var routeStart: LocationTarget?
     @ObservationIgnored
     private var movementTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var startupTimeoutTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var startupRequestTask: Task<Void, Never>?
 
     var progress: Double {
         guard totalDistance > 0 else { return 0 }
@@ -74,6 +78,10 @@ final class WalkingSimulationController {
     }
 
     func prepare(route: MKRoute, destination: LocationTarget) {
+        startupRequestTask?.cancel()
+        startupRequestTask = nil
+        startupTimeoutTask?.cancel()
+        startupTimeoutTask = nil
         movementTask?.cancel()
         movementTask = nil
 
@@ -106,6 +114,10 @@ final class WalkingSimulationController {
             routePoints.count >= 2
         else { return nil }
 
+        startupRequestTask?.cancel()
+        startupRequestTask = nil
+        startupTimeoutTask?.cancel()
+        startupTimeoutTask = nil
         movementTask?.cancel()
         movementTask = nil
         routePoints.reverse()
@@ -130,20 +142,48 @@ final class WalkingSimulationController {
             return
         }
 
+        startupRequestTask?.cancel()
+        startupRequestTask = nil
+        startupTimeoutTask?.cancel()
+        startupTimeoutTask = nil
         movementTask?.cancel()
         distanceTravelled = 0
         currentCoordinate = routePoints[0].coordinate
         phase = .preparing
-
-        await appModel.startWalkingLocationSession(
-            at: movementTarget(at: routePoints[0].coordinate, destination: destination),
-            destination: destination,
-            paceMetresPerSecond: pace.metresPerSecond
-        )
-
-        if case .idle = appModel.deviceSession.phase, phase == .preparing {
-            phase = .failed("Roam Control could not start the walking session.")
+        startupTimeoutTask = Task { @MainActor [weak self, weak deviceSession = appModel.deviceSession] in
+            do { try await Task.sleep(for: .seconds(60)) } catch { return }
+            guard let self, let deviceSession else { return }
+            self.failStartupIfStillPreparing(using: deviceSession)
         }
+
+        let initialTarget = movementTarget(at: routePoints[0].coordinate, destination: destination)
+        let speed = pace.metresPerSecond
+        let request = Task { @MainActor in
+            await appModel.startWalkingLocationSession(
+                at: initialTarget,
+                destination: destination,
+                paceMetresPerSecond: speed
+            )
+        }
+        startupRequestTask = request
+        await request.value
+
+        guard !request.isCancelled else { return }
+        startupRequestTask = nil
+        guard phase == .preparing else { return }
+        // 复用连接时坐标可能相同，不一定收到新的 active 状态通知。
+        handleDeviceSessionPhase(appModel.deviceSession.phase, deviceSession: appModel.deviceSession)
+    }
+
+    private func failStartupIfStillPreparing(using deviceSession: LocalDeviceSessionCoordinator) {
+        guard phase == .preparing else { return }
+        deviceSession.stop()
+        startupRequestTask?.cancel()
+        startupRequestTask = nil
+        startupTimeoutTask?.cancel()
+        startupTimeoutTask = nil
+        currentCoordinate = nil
+        phase = .failed("Roam Control could not start the walking session.")
     }
 
     func togglePause() {
@@ -159,6 +199,10 @@ final class WalkingSimulationController {
 
     func stop(using deviceSession: LocalDeviceSessionCoordinator) {
         guard locksDestination || isFailed else { return }
+        startupRequestTask?.cancel()
+        startupRequestTask = nil
+        startupTimeoutTask?.cancel()
+        startupTimeoutTask = nil
         movementTask?.cancel()
         movementTask = nil
 
@@ -180,18 +224,31 @@ final class WalkingSimulationController {
         switch devicePhase {
         case .active:
             guard phase == .preparing else { return }
+            startupTimeoutTask?.cancel()
+            startupTimeoutTask = nil
             phase = .walking
             beginMovement(using: deviceSession)
 
         case .stopping:
             if locksDestination || isFailed {
+                startupTimeoutTask?.cancel()
+                startupTimeoutTask = nil
                 movementTask?.cancel()
                 movementTask = nil
                 phase = .stopping
             }
 
         case .idle:
+            if phase == .preparing {
+                startupTimeoutTask?.cancel()
+                startupTimeoutTask = nil
+                currentCoordinate = nil
+                phase = .failed("Roam Control could not start the walking session.")
+                return
+            }
             guard phase == .stopping else { return }
+            startupTimeoutTask?.cancel()
+            startupTimeoutTask = nil
             movementTask?.cancel()
             movementTask = nil
             currentCoordinate = nil
@@ -200,6 +257,8 @@ final class WalkingSimulationController {
 
         case .failed(let message):
             guard locksDestination || phase == .preparing else { return }
+            startupTimeoutTask?.cancel()
+            startupTimeoutTask = nil
             movementTask?.cancel()
             movementTask = nil
             currentCoordinate = nil
@@ -211,6 +270,10 @@ final class WalkingSimulationController {
     }
 
     func reset() {
+        startupRequestTask?.cancel()
+        startupRequestTask = nil
+        startupTimeoutTask?.cancel()
+        startupTimeoutTask = nil
         movementTask?.cancel()
         movementTask = nil
         routePoints = []
@@ -229,6 +292,8 @@ final class WalkingSimulationController {
     }
 
     private func beginMovement(using deviceSession: LocalDeviceSessionCoordinator) {
+        startupTimeoutTask?.cancel()
+        startupTimeoutTask = nil
         movementTask?.cancel()
         movementTask = Task { @MainActor [weak self, weak deviceSession] in
             var lastTick = Date.now

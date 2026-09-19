@@ -56,7 +56,9 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Cat Go uses the local network to securely pair with and control this iPhone.</string>
 	<key>UIBackgroundModes</key>
-	<array><string>location</string></array>
+	<array>
+		<string>location</string>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Cat Go uses location updates to keep fixed and walking sessions running in the background, and to recenter on your real position after a session stops.</string>
 	<key>RoamControlBuildTimestamp</key>
@@ -76,5 +78,10 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

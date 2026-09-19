@@ -113,7 +113,7 @@ swift += r'''
         let cellular = Coordinator()
         cellular.openLocalDevVPNForPendingSession()
         await settle(cellular)
-        precondition(cellular.guidanceCount == 1 && UIApplication.shared.opens == 0)
+        precondition(cellular.discoveryCount == 0 && cellular.guidanceCount == 1 && UIApplication.shared.opens == 0)
         precondition(EmbeddedVPNService.shared.connects == 1)
         reset()
         let missingSession = Coordinator()
@@ -127,7 +127,7 @@ swift += r'''
         let connected = Coordinator()
         connected.openLocalDevVPNForPendingSession()
         await settle(connected)
-        precondition(connected.guidanceCount == 1 && EmbeddedVPNService.shared.connects == 0)
+        precondition(connected.discoveryCount == 0 && connected.guidanceCount == 1 && EmbeddedVPNService.shared.connects == 0)
         precondition(UIApplication.shared.opens == 0)
         reset()
         EmbeddedVPNService.shared.status = .connecting
@@ -138,21 +138,21 @@ swift += r'''
             EmbeddedVPNService.shared.status = .connected
         }
         await settle(transitioning)
-        precondition(transitioning.guidanceCount == 1 && EmbeddedVPNService.shared.connects == 0)
+        precondition(transitioning.discoveryCount == 0 && transitioning.guidanceCount == 1 && EmbeddedVPNService.shared.connects == 0)
         reset()
         UIApplication.shared.externalInstalled = true
         let external = Coordinator()
         external.openLocalDevVPNForPendingSession()
         await settle(external)
         precondition(UIApplication.shared.opens == 0 && EmbeddedVPNService.shared.connects == 1)
-        precondition(external.guidanceCount == 1)
+        precondition(external.discoveryCount == 0 && external.guidanceCount == 1)
         reset()
         EmbeddedVPNService.shared.status = .disconnected
         UIApplication.shared.externalInstalled = true
         let configured = Coordinator()
         configured.openLocalDevVPNForPendingSession()
         await settle(configured)
-        precondition(configured.guidanceCount == 1 && UIApplication.shared.opens == 0)
+        precondition(configured.discoveryCount == 0 && configured.guidanceCount == 1 && UIApplication.shared.opens == 0)
         reset()
         let wifi = Coordinator()
         wifi.isMobileDataStartupMode = false
@@ -194,7 +194,7 @@ swift += r'''
         precondition(restarted.embeddedVPNStartupTask != nil)
         EmbeddedVPNService.shared.suspended = false
         await newTask?.value
-        precondition(restarted.guidanceCount == 1 && restarted.failure == nil)
+        precondition(restarted.discoveryCount == 0 && restarted.guidanceCount == 1 && restarted.failure == nil)
         reset()
         EmbeddedVPNService.shared.suspended = true
         let duplicate = Coordinator()
@@ -203,7 +203,7 @@ swift += r'''
         while EmbeddedVPNService.shared.connects == 0 { await Task.yield() }
         EmbeddedVPNService.shared.suspended = false
         await settle(duplicate)
-        precondition(EmbeddedVPNService.shared.connects == 1 && duplicate.guidanceCount == 1)
+        precondition(EmbeddedVPNService.shared.connects == 1 && duplicate.discoveryCount == 0 && duplicate.guidanceCount == 1)
         print("Embedded VPN standalone/cellular/Wi-Fi routing, no external dependency, denial, cancellation and duplicate startup passed")
     }
 }

@@ -6,7 +6,7 @@ This guide covers Roam Control's development builds and the planned IPA workflow
 
 - Marketing version: `0.9.2`
 - Current build: `56`
-- Bundle identifier: `com.sean.roamcontrol`
+- Bundle identifier: `com.catgo.app`
 - Minimum deployment target: iOS 27
 - Supported device family: iPhone
 

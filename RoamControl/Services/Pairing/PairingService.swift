@@ -17,7 +17,7 @@ protocol PairingService: Sendable {
 }
 
 actor SecurePairingService: PairingService {
-    private let keychainService = "com.sean.roamcontrol.rppairing"
+    private let keychainService = "com.catgo.app.rppairing"
     private let keychainAccount = "current-device"
 
     func storedRecord() throws -> PairingRecordSummary? {

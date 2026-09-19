@@ -1,6 +1,11 @@
 // Safe public defaults. A checkout builds without analytics and without using
 // the repository owner's Apple development team.
-ROAMCONTROL_APP_BUNDLE_IDENTIFIER = com.sean.roamcontrol
+ROAMCONTROL_APP_BUNDLE_IDENTIFIER = com.catgo.app
 DEVELOPMENT_TEAM =
+
+// URL 中的斜线通过变量展开，避免被 xcconfig 当成注释。
+CATGO_URL_SLASH = /
+CATGO_ACTIVATION_BASE_URL = https:$(CATGO_URL_SLASH)$(CATGO_URL_SLASH)ios.iirrll.top
+CATGO_ACTIVATION_DEBUG_BASE_URL = http:$(CATGO_URL_SLASH)$(CATGO_URL_SLASH)192.168.110.119:18063
 
 #include? "Local.private.xcconfig"

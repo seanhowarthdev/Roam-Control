@@ -40,6 +40,8 @@ final class AppModel {
     let pairingService: any PairingService
     let onDevicePairing: OnDevicePairingCoordinator
     let deviceSession: LocalDeviceSessionCoordinator
+    let activation: ActivationService
+    var isShowingActivationGuidance = false
     private let usageAnalytics: UsageAnalyticsService
 
     init(
@@ -49,6 +51,7 @@ final class AppModel {
         self.pairingService = pairingService
         self.onDevicePairing = .shared
         self.deviceSession = LocalDeviceSessionCoordinator()
+        self.activation = ActivationService()
         self.usageAnalytics = UsageAnalyticsService(preferences: preferences)
         self.preferences = preferences
         let hasCompletedOnboarding = preferences.bool(forKey: Self.onboardingKey)
@@ -115,6 +118,14 @@ final class AppModel {
                 enabled: self?.sharesAnonymousUsageStatistics ?? false
             )
         }
+
+        activation.onAuthorizationLost = { [weak self] in
+            guard let self else { return }
+            if self.onDevicePairing.isRunning { self.cancelOnDevicePairing() }
+            // 授权失败只阻止下一次修改；当前模拟位置保持不变。
+            self.isShowingActivationGuidance = true
+        }
+        deviceSession.canModifyLocation = { [weak self] in self?.activation.isAuthorized == true }
 
         if hasCompletedOnboarding {
             usageAnalytics.recordActivation(enabled: sharesAnonymousUsageStatistics)
@@ -271,6 +282,7 @@ final class AppModel {
     }
 
     func importPairingRecord(from url: URL) async {
+        guard await requireActivation() else { return }
         pairingStatus = .importing
 
         do {
@@ -285,10 +297,14 @@ final class AppModel {
         }
     }
 
-    func startOnDevicePairing() {
+    func startOnDevicePairing() async {
+        guard await requireActivation() else { return }
         onDevicePairing.start { [weak self] record, hostAltIRK in
             guard let self else {
                 throw PairingServiceError.corruptStoredRecord
+            }
+            guard self.activation.isAuthorized else {
+                throw ActivationError.server(self.activation.phase.guidance)
             }
 
             let summary = try await self.pairingService.storeGeneratedRecord(
@@ -341,6 +357,7 @@ final class AppModel {
         historyTarget: LocationTarget,
         recovery: SessionRecoveryRecord
     ) async {
+        guard await requireActivation(), !Task.isCancelled else { return }
         guard case .paired = pairingStatus else {
             connectionState = .notConfigured
             return
@@ -365,7 +382,9 @@ final class AppModel {
         }
 
         do {
-            guard let pairingRecord = try await pairingService.pairingRecordData() else {
+            let loadedPairingRecord = try await pairingService.pairingRecordData()
+            guard !Task.isCancelled else { return }
+            guard let pairingRecord = loadedPairingRecord else {
                 activeSessionRecovery = nil
                 pendingSessionAnalyticsEvent = nil
                 pairingStatus = .notPaired
@@ -382,6 +401,7 @@ final class AppModel {
                 : .fixedLocationStarted
             deviceSession.start(pairingRecord: pairingRecord, target: deviceTarget)
         } catch {
+            guard !Task.isCancelled else { return }
             activeSessionRecovery = nil
             pendingSessionAnalyticsEvent = nil
             connectionState = .failed(message: error.localizedDescription)
@@ -415,7 +435,8 @@ final class AppModel {
             }
             deviceSession.start(
                 pairingRecord: pairingRecord,
-                target: recovery.lastReportedLocation
+                target: recovery.lastReportedLocation,
+                restoringRealLocation: true
             )
         } catch {
             isRestoringInterruptedSession = false
@@ -455,6 +476,14 @@ final class AppModel {
     func appBecameActive() {
         guard hasCompletedOnboarding else { return }
         usageAnalytics.recordActivation(enabled: sharesAnonymousUsageStatistics)
+    }
+
+    private func requireActivation() async -> Bool {
+        guard await activation.refresh(), activation.isAuthorized else {
+            isShowingActivationGuidance = true
+            return false
+        }
+        return true
     }
 
     func removePairingRecord() async {

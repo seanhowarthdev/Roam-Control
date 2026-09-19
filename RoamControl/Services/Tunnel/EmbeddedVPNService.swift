@@ -15,7 +15,7 @@ final class EmbeddedVPNService {
     private var observer: NSObjectProtocol?
 
     private var providerIdentifier: String {
-        (Bundle.main.bundleIdentifier ?? "com.sean.roamcontrol") + ".RoamTunnel"
+        (Bundle.main.bundleIdentifier ?? "com.catgo.app") + ".RoamTunnel"
     }
 
     var statusText: String {

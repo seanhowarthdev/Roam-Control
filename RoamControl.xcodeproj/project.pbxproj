@@ -256,7 +256,7 @@
 				CURRENT_PROJECT_VERSION = 61;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "Configuration/RoamControl-Info.plist";
+				INFOPLIST_FILE = "Configuration/RoamControl-Debug-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MARKETING_VERSION = 0.9.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(ROAMCONTROL_APP_BUNDLE_IDENTIFIER)";

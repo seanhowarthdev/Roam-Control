@@ -103,15 +103,17 @@ final class LocalDeviceSessionCoordinator: NSObject {
     }
 
     var onPhaseChange: ((DeviceSessionPhase) -> Void)?
+    var canModifyLocation: (() -> Bool)?
+    private var isRestoringRealLocation = false
 
     private let browser = NetServiceBrowser()
     private let wifiPathMonitor = NWPathMonitor(requiredInterfaceType: .wifi)
     private let wifiPathMonitorQueue = DispatchQueue(
-        label: "com.sean.roamcontrol.wifi-path",
+        label: "com.catgo.app.wifi-path",
         qos: .utility
     )
     private let serviceProbeQueue = DispatchQueue(
-        label: "com.sean.roamcontrol.service-probe",
+        label: "com.catgo.app.service-probe",
         qos: .userInitiated
     )
     private var discoveredServices: [NetService] = []
@@ -172,8 +174,10 @@ final class LocalDeviceSessionCoordinator: NSObject {
         }
     }
 
-    func start(pairingRecord: Data, target: LocationTarget) {
+    func start(pairingRecord: Data, target: LocationTarget, restoringRealLocation: Bool = false) {
+        guard restoringRealLocation || canModifyLocation?() != false else { return }
         guard !workerIsRunning, !isBusy else { return }
+        isRestoringRealLocation = restoringRealLocation
         sessionAttemptIdentifier = UUID()
         terminalFailureReported = false
         retryTelemetry.reset()
@@ -218,6 +222,10 @@ final class LocalDeviceSessionCoordinator: NSObject {
 
     @discardableResult
     func updateLocation(_ target: LocationTarget) -> ActiveLocationUpdateResult {
+        guard canModifyLocation?() != false else {
+            stop()
+            return .unavailable
+        }
         guard
             workerIsRunning,
             case .active = phase,
@@ -365,7 +373,11 @@ final class LocalDeviceSessionCoordinator: NSObject {
     // Retry once per start; never turn this into an unbounded recovery loop.
     private func showConnectionHelp() {
         guard pendingSession != nil, !workerIsRunning else { return }
-        guard hasRequestedLocalDevVPNThisAttempt, !isMobileDataStartupMode,
+        if isMobileDataStartupMode {
+            enterMobileDataGuidance()
+            return
+        }
+        guard hasRequestedLocalDevVPNThisAttempt,
               !vpnReturnRetryUsed else {
             mobileDataGuidance = .connectionHelp
             return
@@ -555,6 +567,10 @@ final class LocalDeviceSessionCoordinator: NSObject {
     }
 
     private func runNativeLocationSession() {
+        guard isRestoringRealLocation || canModifyLocation?() != false else {
+            stop()
+            return
+        }
         guard let pendingSession, let resolvedService else {
             fail("Roam Control lost the location session details.")
             return
