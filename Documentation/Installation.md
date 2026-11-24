@@ -1,56 +1,54 @@
 # Installation
 
-Roam Control is not distributed through the App Store or TestFlight. Public beta builds are supplied as unsigned IPA files for users to sign with their own Apple account.
+Roam Control is officially available on the Apple App Store.
+
+[Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
+
+> [!IMPORTANT]
+> **Migrating from a sideloaded version? Back up first.**
+>
+> 1. Open your existing Roam Control installation.
+> 2. Go to **Settings > Backup & Restore** and create a backup.
+> 3. Save the backup outside Roam Control, such as in iCloud Drive, and verify that the file is accessible.
+> 4. Confirm Roam Control is available in your App Store region.
+> 5. Stop any active location simulation using **Stop & Restore**.
+> 6. Delete the existing sideloaded Roam Control app. For LiveContainer, remove the Roam Control instance only.
+> 7. [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385).
+> 8. Restore your backup and complete device pairing again.
+>
+> **Do not delete your existing installation before safely saving your backup.**
+>
+> Backups preserve favourites, history and supported preferences. Pairing information is not included.
+>
+> Backup & Restore is available from version 0.9.4 onwards. If you are using an earlier version, contact support before deleting it if you need to preserve your data.
+
 
 ## Requirements
 
 - An iPhone running iOS 27 or newer.
-- Developer Mode enabled under **Settings → Privacy & Security**.
+- Developer Mode enabled under **Settings > Privacy & Security** for device pairing.
 - [LocalDevVPN](https://apps.apple.com/app/localdevvpn/id6755608044) installed on the iPhone.
-- SideStore for a standalone install, or LiveContainer for a contained install.
 
-## Install with SideStore
+## Install Roam Control
 
-1. Download the IPA attached to the matching GitHub Release. Do not download an IPA from an untrusted mirror.
-2. In SideStore, tap **+** and choose the downloaded IPA.
-3. Allow SideStore to sign and install Roam Control with your Apple account.
-4. Open Roam Control and complete its introduction and device-pairing flow.
-5. Open LocalDevVPN and enable its local tunnel before starting a location.
+1. [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385).
+2. Open Roam Control and complete the introduction.
+3. Restore an existing backup if migrating from a sideloaded installation.
+4. Complete the device-pairing process.
+5. Open LocalDevVPN and enable its local tunnel before starting a location simulation.
 
-With a free Apple Account, SideStore documents two separate signing limits: up to 3 active apps at one time, including SideStore, and up to 10 App IDs registered within a 7-day period. These are Apple signing limits, not Roam Control subscriptions.
+SideStore, LiveContainer, IPA signing and seven-day app refreshes are no longer required to install or maintain Roam Control.
 
-For ordinary updates that keep the same app identifier, install the newer IPA over the existing copy rather than deleting the app first.
+## Updates
 
-**Roam Control 0.9.5 is a one-time exception for users coming from 0.9.4.** Version 0.9.5 uses the new `com.roamcontrol` app identifier, so existing 0.9.4 app data does not automatically carry across. Before installing 0.9.5, create a backup in **Settings > Backup & Restore** if you want to preserve favourites, history and supported settings. Restore that backup during the 0.9.5 migration flow. Pairing must be completed again.
+Future public updates are distributed through the App Store.
 
-For questions about the old and new App IDs, active app slots, App ID expiry and restoring 0.9.4 data, see the [0.9.5 Migration & SideStore FAQ](Migration095.md).
+For ordinary App Store updates, do not delete your existing installation. Keeping regular backups is recommended.
 
+## Historical sideloaded releases
 
-## Install with LiveContainer
+Public IPA distribution ended on 24 November 2026.
 
-Roam Control can also run through LiveContainer.
-
-1. Download the IPA attached to the matching GitHub Release.
-2. Import Roam Control into LiveContainer.
-3. **Before launching Roam Control for the first time**, enable LiveContainer's local-notification compatibility option for that Roam Control instance:
-
-   **LiveContainer → Apps → long-press Roam Control → App Settings → Fix Local Notifications → On**
-
-4. Launch Roam Control and continue through first-time setup and pairing normally.
-5. Open LocalDevVPN and enable its local tunnel before starting a location.
-
-With **Fix Local Notifications** enabled, the pairing notification is delivered through LiveContainer. Tapping it returns to the correct Roam Control instance so pairing can continue normally.
-
-Because LiveContainer relays the notification, it may show LiveContainer, sandbox or container-style details rather than looking exactly like a notification from a standalone Roam Control install. This is specific to the LiveContainer environment. SideStore installs are unaffected.
-
-## Verify a release
-
-Each GitHub Release publishes the IPA's SHA-256 checksum. On a Mac, calculate the checksum of the IPA you downloaded:
-
-```sh
-shasum -a 256 RoamControl-0.9.2-Beta3-build53.ipa
-```
-
-Compare the result with the SHA-256 value shown on the matching GitHub Release before installing it.
+Previous GitHub releases remain available as historical documentation, not as app downloads.
 
 See the [user guide](UserGuide.md) for pairing and everyday operation.

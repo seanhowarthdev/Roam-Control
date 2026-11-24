@@ -1,5 +1,21 @@
 # Roam Control 0.9.5 Migration & SideStore FAQ
 
+This page is retained as historical documentation of the earlier sideloaded app-identity migration.
+
+> [!IMPORTANT]
+> **Roam Control is now available on the App Store.**
+>
+> Public IPA distribution has ended.
+>
+> Existing sideloaded users must create a backup in **Settings > Backup & Restore**, save it safely outside the app, confirm App Store availability in their region and use **Stop & Restore** before deleting the old installation.
+>
+> Then [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385), restore the backup and pair the device again.
+>
+> Backup & Restore is available from version 0.9.4 onwards. Users of earlier versions should contact support before deleting their existing installation if they need to preserve data.
+
+
+For current installation and migration instructions, see the [Installation Guide](Installation.md).
+
 Roam Control 0.9.5 includes a one-time app-identity migration for users upgrading from 0.9.4.
 
 Roam Control 0.9.4 used the app identifier `com.sean.roamcontrol`. Roam Control 0.9.5 and later use the permanent identifier `com.roamcontrol`.

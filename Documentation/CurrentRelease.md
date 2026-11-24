@@ -1,6 +1,8 @@
 # Roam Control 0.9.9
 
-Build 105, released 20 October 2026.
+Build 108, released on the App Store on 24 November 2026.
+
+This is the first official App Store release of Roam Control. It carries forward the features of Build 105 with updated privacy wording for App Store distribution.
 
 ## Highlights
 
@@ -16,30 +18,36 @@ For detailed changes, see [CHANGELOG.md](../CHANGELOG.md).
 
 ## Before installing
 
-- Requires **iOS 27 or newer** and an iPhone with **Developer Mode** enabled.
-- **LocalDevVPN is still required** for local pairing connectivity.
-- Distributed as an **unsigned IPA**, to be signed through SideStore or a compatible installation method. Free Apple accounts remain subject to signing and refresh restrictions.
-- For LiveContainer installation, enable **Fix Local Notifications** before the app's first launch, as documented in the [installation guide](Installation.md).
+- Requires iOS 27 or newer.
+- Developer Mode remains required for device pairing.
+- LocalDevVPN remains required for local pairing connectivity.
+- SideStore, LiveContainer and IPA signing are no longer required.
 - Intended for development, quality assurance and responsible personal testing on an iPhone you own or control.
 
 > [!IMPORTANT]
-> **Upgrading directly from Roam Control 0.9.4 or earlier? Create a backup before installing 0.9.9.**
+> **Migrating from a sideloaded version? Back up first.**
 >
-> Versions from 0.9.5 use the newer `com.roamcontrol` app identifier. Your 0.9.4 app data will not automatically transfer to that app container.
+> 1. Open your existing Roam Control installation.
+> 2. Go to **Settings > Backup & Restore** and create a backup.
+> 3. Save the backup outside Roam Control, such as in iCloud Drive, and verify that the file is accessible.
+> 4. Confirm Roam Control is available in your App Store region.
+> 5. Stop any active location simulation using **Stop & Restore**.
+> 6. Delete the existing sideloaded Roam Control app. For LiveContainer, remove the Roam Control instance only.
+> 7. [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385).
+> 8. Restore your backup and complete device pairing again.
 >
-> In the older app, open **Settings > Backup & Restore** and create a backup to preserve favourites, history and supported settings. Restore it during the migration flow after installing the newer app.
+> **Do not delete your existing installation before safely saving your backup.**
 >
-> Pairing data is not included in app backups, so this iPhone must be paired again.
+> Backups preserve favourites, history and supported preferences. Pairing information is not included.
 >
-> See the [Migration & SideStore FAQ](Migration095.md).
+> Backup & Restore is available from version 0.9.4 onwards. If you are using an earlier version, contact support before deleting it if you need to preserve your data.
+
 
 ## Download
 
-Download `RoamControl-0.9.9-Build105.ipa` from the [0.9.9 GitHub Release](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.9).
+[Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
 
-**SHA-256**
-
-`211f1057c70292da468226b39808d8777549c02923c14afc504d9e1d2daba86e`
+See the [Installation Guide](Installation.md) for full instructions.
 
 ## Continuing features
 

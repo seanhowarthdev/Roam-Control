@@ -6,6 +6,29 @@ Detailed internal engineering notes are maintained privately.
 
 See [Release History](Documentation/ReleaseHistory.md) and [Download History](Documentation/DownloadHistory.md) for additional release records.
 
+## 0.9.9 - Build 108
+
+Released 24 November 2026.
+
+### App Store release
+
+- First official Apple App Store release.
+- Public IPA distribution retired.
+- SideStore, LiveContainer and IPA signing are no longer required for installation.
+- LocalDevVPN and device pairing remain required.
+
+> [!IMPORTANT]
+> **Roam Control is now available on the App Store.**
+>
+> Public IPA distribution has ended.
+>
+> Existing sideloaded users must create a backup in **Settings > Backup & Restore**, save it safely outside the app, confirm App Store availability in their region and use **Stop & Restore** before deleting the old installation.
+>
+> Then [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385), restore the backup and pair the device again.
+>
+> Backup & Restore is available from version 0.9.4 onwards. Users of earlier versions should contact support before deleting their existing installation if they need to preserve data.
+
+
 ## 0.9.9 - Build 105
 
 Released 20 October 2026.
@@ -42,11 +65,11 @@ Released 20 October 2026.
 
 ### Installation and migration
 
-- Requires iOS 27 or newer, Developer Mode and LocalDevVPN for pairing connectivity. Distributed as an unsigned IPA for signing through SideStore or a compatible installation method.
+- Requires iOS 27 or newer, Developer Mode and LocalDevVPN for pairing connectivity. Originally distributed as an unsigned IPA for signing through SideStore or a compatible installation method.
 - **Upgrading directly from 0.9.4 or earlier:** Back up favourites, history and supported preferences before moving to the newer `com.roamcontrol` app identifier. Data does not automatically transfer from the old app container; pairing records are not included in app backups and the device must be paired again.
 - See [Installation](Documentation/Installation.md), [Migration FAQ](Documentation/Migration095.md) and [Current Release](Documentation/CurrentRelease.md).
 
-### Distribution
+### Historical distribution (retired)
 
 - IPA: `RoamControl-0.9.9-Build105.ipa`
 - SHA-256: `211f1057c70292da468226b39808d8777549c02923c14afc504d9e1d2daba86e`

@@ -2,10 +2,35 @@
 
 This page records the public evolution of Roam Control at a user-facing level.
 
-Older releases remain listed on GitHub for historical reference. Roam Control keeps the current stable IPA available and may retain an older IPA where it is still required for migration compatibility.
+GitHub releases remain available for historical reference. Public app distribution moved to the Apple App Store on 24 November 2026.
+
+> [!IMPORTANT]
+> **Roam Control is now available on the App Store.**
+>
+> Public IPA distribution has ended.
+>
+> Existing sideloaded users must create a backup in **Settings > Backup & Restore**, save it safely outside the app, confirm App Store availability in their region and use **Stop & Restore** before deleting the old installation.
+>
+> Then [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385), restore the backup and pair the device again.
+>
+> Backup & Restore is available from version 0.9.4 onwards. Users of earlier versions should contact support before deleting their existing installation if they need to preserve data.
+
+## 0.9.9 - Build 108
+
+First official App Store release.
+
+Released 24 November 2026.
+
+- Approved by Apple on its first App Review submission.
+- Official distribution through the Apple App Store.
+- No sideloading, IPA signing or periodic signing refreshes required.
+- Existing sideloaded users must back up before migrating.
+
+[Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
+
 ## 0.9.9 - Build 105
 
-Current stable public release.
+Final public sideloaded release.
 
 Released 20 October 2026.
 
@@ -61,7 +86,7 @@ Released 3 October 2026.
 
 ## 0.9.4 - Build 74
 
-Older stable release retained temporarily for migration.
+Historical stable release previously retained for migration.
 
 Released 26 September 2026.
 

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Current release:</strong> 0.9.9 Build 105 · <strong>Requires:</strong> iOS 27+
+  <strong>Current release:</strong> 0.9.9 Build 108 · <strong>Requires:</strong> iOS 27+
 </p>
 
 <p align="center">
@@ -19,13 +19,38 @@
   <img src="https://img.shields.io/badge/License-Proprietary-lightgrey" alt="Proprietary">
 </p>
 
+<p align="center">
+  <a href="https://apps.apple.com/app/roam-control/id6838265385">
+    <img src="https://img.shields.io/badge/Download_on_the-App_Store-black?style=for-the-badge&logo=apple&logoColor=white" alt="Download on the App Store">
+  </a>
+</p>
+
+> [!IMPORTANT]
+> **Migrating from a sideloaded version? Back up first.**
+>
+> 1. Open your existing Roam Control installation.
+> 2. Go to **Settings > Backup & Restore** and create a backup.
+> 3. Save the backup outside Roam Control, such as in iCloud Drive, and verify that the file is accessible.
+> 4. Confirm Roam Control is available in your App Store region.
+> 5. Stop any active location simulation using **Stop & Restore**.
+> 6. Delete the existing sideloaded Roam Control app. For LiveContainer, remove the Roam Control instance only.
+> 7. [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385).
+> 8. Restore your backup and complete device pairing again.
+>
+> **Do not delete your existing installation before safely saving your backup.**
+>
+> Backups preserve favourites, history and supported preferences. Pairing information is not included.
+>
+> Backup & Restore is available from version 0.9.4 onwards. If you are using an earlier version, contact support before deleting it if you need to preserve your data.
+
+
 ## About
 
 Roam Control is an iPhone app for location-based development, quality assurance and responsible personal testing on a device you own and control.
 
 It supports fixed reported locations, Walking, Driving and Cycling routes, Joystick movement, GPX import/export, favourites, history, on-device pairing and guided LocalDevVPN-compatible sessions.
 
-Roam Control is distributed as a prebuilt IPA. The application source code is not publicly distributed.
+Roam Control is distributed exclusively through the Apple App Store. The application source code is not publicly distributed.
 
 ## Screenshots
 
@@ -69,45 +94,33 @@ Roam Control is distributed as a prebuilt IPA. The application source code is no
 
 ## Latest Release Updates
 
-**Roam Control 0.9.9 (Build 105)**
+**Roam Control 0.9.9 (Build 108)**
 
-- [Download and full changelog](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.9)
-- [Discord announcement](https://discord.com/channels/1545707354853736468/1545708089146081384/1562193889417236643)
-- [Reddit discussion](https://www.reddit.com/r/sideloaded/comments/1xb2nvt/roam_control_099_is_out_10_languages_custom/)
+Released on the App Store on 24 November 2026.
+
+- [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
+- [Current release information](Documentation/CurrentRelease.md)
+- [Changelog](CHANGELOG.md)
 
 ## Install
 
-Roam Control is not distributed through the App Store or TestFlight.
+[Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
 
-Download the IPA from the [0.9.9 GitHub Release](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.9) and install it using SideStore, or import it into LiveContainer.
+Roam Control is free to download. SideStore, LiveContainer and IPA signing are no longer required for installation.
 
-> [!IMPORTANT]
-> **Upgrading from Roam Control 0.9.4? Back up before installing 0.9.9.**
->
-> Roam Control 0.9.9 uses the new app identifier, so your existing 0.9.4 app data will **not automatically carry across**.
->
-> Before installing 0.9.9, open Roam Control 0.9.4 and create a backup from **Settings > Backup & Restore** if you want to preserve your favourites, history and supported settings.
->
-> After installing 0.9.9, choose **Restore Backup** during the migration flow.
->
-> Pairing information is not included in backups, so this iPhone will need to be paired again.
->
-> **If you install 0.9.9 without creating a backup first, Roam Control cannot automatically recover those items from the old app.**
->
-> See the [0.9.5 Migration & SideStore FAQ](Documentation/Migration095.md) for App ID, active-app slot and migration questions.
+Only install Roam Control from the official App Store listing. Unofficial mirrors, modified builds and redistributed copies are not authorised.
 
+LocalDevVPN and device pairing remain required for location simulation.
 
-For LiveContainer installs, **Fix Local Notifications must be enabled before Roam Control's first run** so the pairing notification can be delivered correctly.
+Existing sideloaded users must follow the backup and migration instructions above before installing the App Store version.
 
-Read the [Installation Guide](Documentation/Installation.md) before installing.
-
-Only download Roam Control from the official GitHub repository. Unofficial mirrors, modified builds and redistributed copies are not authorised.
+Read the [Installation Guide](Documentation/Installation.md) for full instructions.
 
 ## Documentation
 - [Documentation index](Documentation/README.md)
 
 - [Installation](Documentation/Installation.md)
-- [0.9.5 Migration & SideStore FAQ](Documentation/Migration095.md)
+- [Historical 0.9.5 Migration & SideStore FAQ](Documentation/Migration095.md)
 - [User Guide](Documentation/UserGuide.md)
 - [Using a Personal VPN](Documentation/PersonalVPN.md)
 - [VPN Compatibility](Documentation/VPNCompatibility.md)
@@ -147,9 +160,13 @@ For security-sensitive reports, use GitHub Security Advisories.
 
 ## Releases
 
-Roam Control keeps the current stable IPA available and may retain an older IPA where it is still required for migration compatibility.
+All current and future public app downloads are provided through the App Store.
 
-Older GitHub Releases may remain visible as historical records after their downloadable assets have been retired.
+[Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
+
+GitHub releases are retained as historical records of Roam Control's development. Public IPA distribution has ended.
+
+See [Download History](Documentation/DownloadHistory.md) for historical IPA download statistics.
 
 ## Licence and copyright
 
@@ -157,6 +174,6 @@ Roam Control is proprietary software.
 
 Copyright © 2026 Sean Howarth. All rights reserved.
 
-The public IPA may be downloaded and used personally subject to the terms in [LICENSE](LICENSE). Redistribution, modification, repackaging, mirroring and unofficial releases are not permitted without prior written permission.
+Official Roam Control releases may be downloaded and used personally subject to the terms in [LICENSE](LICENSE). Redistribution, modification, repackaging, mirroring and unofficial releases are not permitted without prior written permission.
 
 Historical source code that was previously published under other licences remains governed by the licence applicable to the specific version when it was published. Those historical grants are not revoked by the current distribution model.
