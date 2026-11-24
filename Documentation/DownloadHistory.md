@@ -10,7 +10,7 @@ Public IPA distribution ended on 24 November 2026 with the transition to the App
 
 | Version | Build | Released | IPA retired | Final IPA downloads |
 | --- | ---: | --- | --- | ---: |
-| 0.9.9 | 105 | 20 October 2026 | 24 November 2026 | 4,299 |
+| 0.9.9 | 105 | 20 October 2026 | 24 November 2026 | 4,300 |
 | 0.9.7 | 96 | 8 October 2026 | 24 November 2026 | 2,786 |
 | 0.9.6 | 92 | 4 October 2026 | 20 October 2026 | 842 |
 | 0.9.4 | 74 | 26 September 2026 | 8 October 2026 | 1,069 |
@@ -19,7 +19,7 @@ Public IPA distribution ended on 24 November 2026 with the transition to the App
 
 ## End of public IPA distribution
 
-**Total recorded GitHub IPA downloads: 10,293**
+**Total recorded GitHub IPA downloads: 10,294**
 
 These figures cover the six recorded releases and do not represent unique users or a complete count of every early beta download.
 
