@@ -1,11 +1,13 @@
 > [!IMPORTANT]
 > **Distribution update - 25 November 2026**
 >
-> Roam Control was released on the App Store on 24 November 2026. Following a subsequent re-evaluation by Apple, it is currently unavailable for new downloads.
+> Roam Control was released on the App Store on 24 November 2026. Following a subsequent re-evaluation by Apple, App Store and TestFlight availability have been disabled.
+>
+> The previously released Roam Control 0.9.9 (Build 105) IPA is available again for independent sideloading through [GitHub Releases](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.9). This is an existing release, not a new update.
 >
 > Apple has been contacted and clarification is pending.
 >
-> **Do not delete or uninstall your existing Roam Control installation.** Migration to the App Store is currently suspended, and public IPA downloads are unavailable.
+> **Do not unnecessarily delete or uninstall your existing Roam Control installation.** Migration to the App Store remains suspended. Build 105 is available for independent sideloading.
 >
 > Existing users are encouraged to create a backup through **Settings > Backup & Restore**, where supported, and save it safely outside the app.
 >
@@ -22,7 +24,7 @@
 </p>
 
 <p align="center">
-  <strong>Current release:</strong> 0.9.9 Build 108 · <strong>Requires:</strong> iOS 27+
+  <strong>Available release:</strong> 0.9.9 Build 105 · <strong>Requires:</strong> iOS 27+
 </p>
 
 <p align="center">
@@ -40,7 +42,7 @@ Roam Control is an iPhone app for location-based development, quality assurance 
 
 It supports fixed reported locations, Walking, Driving and Cycling routes, Joystick movement, GPX import/export, favourites, history, on-device pairing and guided LocalDevVPN-compatible sessions.
 
-Public distribution of Roam Control is currently suspended. The application source code is not publicly distributed.
+Roam Control is currently available for independent sideloading. The application source code is not publicly distributed.
 
 ## Screenshots
 
@@ -84,20 +86,24 @@ Public distribution of Roam Control is currently suspended. The application sour
 
 ## Latest Release Updates
 
-**Roam Control 0.9.9 (Build 108)**
+**Roam Control 0.9.9 (Build 105)**
 
-Released on the App Store on 24 November 2026.
+Originally released on 20 October 2026 and restored for independent sideloading on 25 November 2026.
+
+Build 108 was released on the App Store on 24 November 2026 but is no longer available for download.
 
 - [Current release information](Documentation/CurrentRelease.md)
 - [Changelog](CHANGELOG.md)
 
 ## Installation availability
 
-New downloads are currently unavailable. Please retain your existing installation.
+[Download Roam Control 0.9.9 (Build 105)](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.9).
+
+Installation requires independent sideloading. Existing users should retain their working installation.
 
 Unofficial mirrors, modified builds and redistributed copies are not authorised.
 
-LocalDevVPN and device pairing remain required for existing installations.
+LocalDevVPN and device pairing remain required.
 
 See the [Installation Guide](Documentation/Installation.md) for current guidance.
 
@@ -145,9 +151,9 @@ For security-sensitive reports, use GitHub Security Advisories.
 
 ## Releases
 
-Public app distribution is currently suspended pending clarification from Apple.
+Independent IPA distribution of Build 105 has resumed. App Store and TestFlight availability remain suspended pending clarification from Apple.
 
-GitHub releases are retained as historical records of Roam Control's development. No public IPA assets are currently available.
+[Roam Control 0.9.9 (Build 105)](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.9) is the only currently available public IPA. Earlier releases are retained as historical records.
 
 See [Download History](Documentation/DownloadHistory.md) for historical IPA download statistics.
 

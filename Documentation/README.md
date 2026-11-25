@@ -7,11 +7,13 @@ Use the sections below to find installation help, guides, release information an
 > [!IMPORTANT]
 > **Distribution update - 25 November 2026**
 >
-> Roam Control was released on the App Store on 24 November 2026. Following a subsequent re-evaluation by Apple, it is currently unavailable for new downloads.
+> Roam Control was released on the App Store on 24 November 2026. Following a subsequent re-evaluation by Apple, App Store and TestFlight availability have been disabled.
+>
+> The previously released Roam Control 0.9.9 (Build 105) IPA is available again for independent sideloading through [GitHub Releases](https://github.com/seanhowarthdev/Roam-Control/releases/tag/v0.9.9). This is an existing release, not a new update.
 >
 > Apple has been contacted and clarification is pending.
 >
-> **Do not delete or uninstall your existing Roam Control installation.** Migration to the App Store is currently suspended, and public IPA downloads are unavailable.
+> **Do not unnecessarily delete or uninstall your existing Roam Control installation.** Migration to the App Store remains suspended. Build 105 is available for independent sideloading.
 >
 > Existing users are encouraged to create a backup through **Settings > Backup & Restore**, where supported, and save it safely outside the app.
 >
