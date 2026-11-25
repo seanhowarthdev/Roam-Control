@@ -157,9 +157,9 @@ Open **Settings → Privacy → What Is Shared** for the same disclosure inside 
 
 > [!NOTE]
 > This guidance applies only to historical sideloaded installations.
-> Roam Control is now distributed through the App Store.
-> Back up your data and save it safely outside the app before deleting your old installation.
-> See the [Installation Guide](Installation.md) for migration instructions.
+> Public distribution is currently suspended.
+> Keep your existing installation and save backups safely outside the app.
+> See the [Installation Guide](Installation.md) for current availability.
 
 For LiveContainer installs, enable **Fix Local Notifications** for Roam Control before its first run:
 

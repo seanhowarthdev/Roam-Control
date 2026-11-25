@@ -1,3 +1,16 @@
+> [!IMPORTANT]
+> **Distribution update - 25 November 2026**
+>
+> Roam Control was released on the App Store on 24 November 2026. Following a subsequent re-evaluation by Apple, it is currently unavailable for new downloads.
+>
+> Apple has been contacted and clarification is pending.
+>
+> **Do not delete or uninstall your existing Roam Control installation.** Migration to the App Store is currently suspended, and public IPA downloads are unavailable.
+>
+> Existing users are encouraged to create a backup through **Settings > Backup & Restore**, where supported, and save it safely outside the app.
+>
+> Roam Control has not been discontinued. Further updates regarding availability will be published here.
+
 <p align="center">
   <img src="Documentation/Images/RoamControl-AppIcon-v2-source.png" width="128" height="128" alt="Roam Control app icon">
 </p>
@@ -19,29 +32,6 @@
   <img src="https://img.shields.io/badge/License-Proprietary-lightgrey" alt="Proprietary">
 </p>
 
-<p align="center">
-  <a href="https://apps.apple.com/app/roam-control/id6838265385">
-    <img src="https://img.shields.io/badge/Download_on_the-App_Store-black?style=for-the-badge&logo=apple&logoColor=white" alt="Download on the App Store">
-  </a>
-</p>
-
-> [!IMPORTANT]
-> **Migrating from a sideloaded version? Back up first.**
->
-> 1. Open your existing Roam Control installation.
-> 2. Go to **Settings > Backup & Restore** and create a backup.
-> 3. Save the backup outside Roam Control, such as in iCloud Drive, and verify that the file is accessible.
-> 4. Confirm Roam Control is available in your App Store region.
-> 5. Stop any active location simulation using **Stop & Restore**.
-> 6. Delete the existing sideloaded Roam Control app. For LiveContainer, remove the Roam Control instance only.
-> 7. [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385).
-> 8. Restore your backup and complete device pairing again.
->
-> **Do not delete your existing installation before safely saving your backup.**
->
-> Backups preserve favourites, history and supported preferences. Pairing information is not included.
->
-> Backup & Restore is available from version 0.9.4 onwards. If you are using an earlier version, contact support before deleting it if you need to preserve your data.
 
 
 ## About
@@ -50,7 +40,7 @@ Roam Control is an iPhone app for location-based development, quality assurance 
 
 It supports fixed reported locations, Walking, Driving and Cycling routes, Joystick movement, GPX import/export, favourites, history, on-device pairing and guided LocalDevVPN-compatible sessions.
 
-Roam Control is distributed exclusively through the Apple App Store. The application source code is not publicly distributed.
+Public distribution of Roam Control is currently suspended. The application source code is not publicly distributed.
 
 ## Screenshots
 
@@ -98,23 +88,18 @@ Roam Control is distributed exclusively through the Apple App Store. The applica
 
 Released on the App Store on 24 November 2026.
 
-- [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
 - [Current release information](Documentation/CurrentRelease.md)
 - [Changelog](CHANGELOG.md)
 
-## Install
+## Installation availability
 
-[Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
+New downloads are currently unavailable. Please retain your existing installation.
 
-Roam Control is free to download. SideStore, LiveContainer and IPA signing are no longer required for installation.
+Unofficial mirrors, modified builds and redistributed copies are not authorised.
 
-Only install Roam Control from the official App Store listing. Unofficial mirrors, modified builds and redistributed copies are not authorised.
+LocalDevVPN and device pairing remain required for existing installations.
 
-LocalDevVPN and device pairing remain required for location simulation.
-
-Existing sideloaded users must follow the backup and migration instructions above before installing the App Store version.
-
-Read the [Installation Guide](Documentation/Installation.md) for full instructions.
+See the [Installation Guide](Documentation/Installation.md) for current guidance.
 
 ## Documentation
 - [Documentation index](Documentation/README.md)
@@ -160,11 +145,9 @@ For security-sensitive reports, use GitHub Security Advisories.
 
 ## Releases
 
-All current and future public app downloads are provided through the App Store.
+Public app distribution is currently suspended pending clarification from Apple.
 
-[Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385)
-
-GitHub releases are retained as historical records of Roam Control's development. Public IPA distribution has ended.
+GitHub releases are retained as historical records of Roam Control's development. No public IPA assets are currently available.
 
 See [Download History](Documentation/DownloadHistory.md) for historical IPA download statistics.
 

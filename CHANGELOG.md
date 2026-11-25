@@ -14,19 +14,21 @@ Released 24 November 2026.
 
 - First official Apple App Store release.
 - Public IPA distribution retired.
-- SideStore, LiveContainer and IPA signing are no longer required for installation.
+- Build 108 was distributed without requiring SideStore, LiveContainer or IPA signing.
 - LocalDevVPN and device pairing remain required.
 
 > [!IMPORTANT]
-> **Roam Control is now available on the App Store.**
+> **Distribution update - 25 November 2026**
 >
-> Public IPA distribution has ended.
+> Roam Control was released on the App Store on 24 November 2026. Following a subsequent re-evaluation by Apple, it is currently unavailable for new downloads.
 >
-> Existing sideloaded users must create a backup in **Settings > Backup & Restore**, save it safely outside the app, confirm App Store availability in their region and use **Stop & Restore** before deleting the old installation.
+> Apple has been contacted and clarification is pending.
 >
-> Then [Download Roam Control on the App Store](https://apps.apple.com/app/roam-control/id6838265385), restore the backup and pair the device again.
+> **Do not delete or uninstall your existing Roam Control installation.** Migration to the App Store is currently suspended, and public IPA downloads are unavailable.
 >
-> Backup & Restore is available from version 0.9.4 onwards. Users of earlier versions should contact support before deleting their existing installation if they need to preserve data.
+> Existing users are encouraged to create a backup through **Settings > Backup & Restore**, where supported, and save it safely outside the app.
+>
+> Roam Control has not been discontinued. Further updates regarding availability will be published here.
 
 
 ## 0.9.9 - Build 105
